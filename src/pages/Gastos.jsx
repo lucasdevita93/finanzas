@@ -9,7 +9,7 @@ import { USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
 const GASTOS_EJEMPLO = [
   // Gastos de Lucas (personales y compartidos que pagó él)
   { id: 1, descripcion: 'Supermercado Coto',  categoria: 'Víveres',           icono: '🛒', importe: 8500,  compartido: true,  pagador: 'Lucas', medio_de_pago: 'Tarjeta Visa BBVA',           fecha: '2026-06-20', cuotas_total: null, cuota_actual: null },
-  { id: 2, descripcion: 'Netflix',             categoria: 'Suscripciones',     icono: '📱', importe: 3200,  compartido: false, pagador: 'Lucas', medio_de_pago: 'Tarjeta Crédito Mercado Pago', fecha: '2026-06-20', cuotas_total: null, cuota_actual: null },
+  { id: 2, descripcion: 'Netflix',             categoria: 'Suscripciones',     icono: '📱', importe: 15750, compartido: false, pagador: 'Lucas', medio_de_pago: 'Tarjeta Crédito Mercado Pago', fecha: '2026-06-20', cuotas_total: null, cuota_actual: null, moneda: 'USD', monto_original: 15, cotizacion: 1050 },
   { id: 3, descripcion: 'Nafta',               categoria: 'Vehículos',         icono: '🚗', importe: 15000, compartido: true,  pagador: 'Sofi',  medio_de_pago: 'Efectivo',                    fecha: '2026-06-17', cuotas_total: null, cuota_actual: null },
   { id: 4, descripcion: 'Restaurante',         categoria: 'Salidas',           icono: '🍻', importe: 12000, compartido: true,  pagador: 'Lucas', medio_de_pago: 'Tarjeta Visa BBVA',           fecha: '2026-06-15', cuotas_total: 3,    cuota_actual: 1    },
   { id: 5, descripcion: 'Farmacia',            categoria: 'Cuidado Personal',  icono: '💆', importe: 4200,  compartido: false, pagador: 'Lucas', medio_de_pago: 'Efectivo',                    fecha: '2026-06-12', cuotas_total: null, cuota_actual: null },
@@ -143,9 +143,12 @@ function Gastos() {
                 const importeCuota = tieneCuotas ? gasto.importe / gasto.cuotas_total : gasto.importe
                 const importeVisible = gasto.compartido ? importeCuota / 2 : importeCuota
 
-                // Subtítulo: medio · Total: $X (si compartido o cuotas) · Cuota N/M (si cuotas)
+                // Subtítulo: medio · USD $X (si aplica) · Total: $X (si compartido o cuotas) · Cuota N/M
                 const pagoSofi = gasto.compartido && gasto.pagador !== USUARIO_ACTUAL
                 const partesSubtitulo = [pagoSofi ? `Pagó ${OTRO_USUARIO}` : gasto.medio_de_pago]
+                if (gasto.moneda === 'USD' && gasto.monto_original) {
+                  partesSubtitulo.push(`USD $${gasto.monto_original}`)
+                }
                 if (gasto.compartido || tieneCuotas) {
                   partesSubtitulo.push(`Total: ${formatearPesos(gasto.importe)}`)
                 }

@@ -14,6 +14,7 @@ function aCargo(gasto) {
 
 function subtituloGasto(gasto) {
   const partes = []
+  if (gasto.moneda === 'USD' && gasto.monto_original) partes.push(`USD $${gasto.monto_original}`)
   if (gasto.cuotas_total || gasto.compartido) partes.push(`Total: ${formatearPesos(gasto.importe)}`)
   if (gasto.cuotas_total) partes.push(`Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`)
   return partes.join(' · ')

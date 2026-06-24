@@ -75,7 +75,9 @@ function PorCategoriaCompartidos({ gastos, onCerrar }) {
                   <div className="gasto-item__info">
                     <span className="gasto-item__desc">{gasto.descripcion}</span>
                     <span className="gasto-item__fecha">
-                      {formatearFecha(gasto.fecha)} · Total: {formatearPesos(gasto.importe)}
+                      {formatearFecha(gasto.fecha)}
+                      {gasto.moneda === 'USD' && gasto.monto_original && ` · USD $${gasto.monto_original}`}
+                      {` · Total: ${formatearPesos(gasto.importe)}`}
                       {gasto.cuotas_total && ` · Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`}
                     </span>
                     <span className="gasto-item__pagador">
@@ -220,7 +222,9 @@ function Compartidos() {
               <div className="gasto-item__info">
                 <span className="gasto-item__desc">{gasto.descripcion}</span>
                 <span className="gasto-item__fecha">
-                  {formatearFecha(gasto.fecha)} · Total: {formatearPesos(gasto.importe)}
+                  {formatearFecha(gasto.fecha)}
+                  {gasto.moneda === 'USD' && gasto.monto_original && ` · USD $${gasto.monto_original}`}
+                  {` · Total: ${formatearPesos(gasto.importe)}`}
                   {gasto.cuotas_total && ` · Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`}
                 </span>
                 <span className="gasto-item__pagador">

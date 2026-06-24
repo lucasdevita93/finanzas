@@ -24,7 +24,9 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
 
   const [form, setForm] = useState(gastoInicial ? {
     fecha: gastoInicial.fecha,
-    importe: gastoInicial.importe,
+    importe: gastoInicial.monto_original ?? gastoInicial.importe,
+    moneda: gastoInicial.moneda ?? 'ARS',
+    cotizacion: gastoInicial.cotizacion ?? '',
     categoria: gastoInicial.categoria,
     descripcion: gastoInicial.descripcion,
     medio_de_pago: gastoInicial.medio_de_pago,
@@ -36,6 +38,8 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
   } : {
     fecha: hoy(),
     importe: '',
+    moneda: 'ARS',
+    cotizacion: '',
     categoria: '',
     descripcion: '',
     medio_de_pago: '',
@@ -46,6 +50,12 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
     responsable: '',
   })
 
+  // Importe en pesos — siempre disponible para cálculos y previews
+  const importeEnPesos = form.moneda === 'USD' && parseFloat(form.cotizacion) > 0
+    ? parseFloat(form.importe || 0) * parseFloat(form.cotizacion)
+    : parseFloat(form.importe || 0)
+
+  const esUSD = form.moneda === 'USD'
   const medioSeleccionado = MEDIOS_DE_PAGO.find(m => m.nombre === form.medio_de_pago)
   const esCredito = medioSeleccionado?.esCredito ?? false
 
@@ -56,7 +66,6 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
   function seleccionarMedio(nombre) {
     const medio = MEDIOS_DE_PAGO.find(m => m.nombre === nombre)
     actualizar('medio_de_pago', nombre)
-    // Si deja de ser crédito, resetea la opción de mes
     if (!medio?.esCredito) setMostrarOpcionMes(false)
   }
 
@@ -71,17 +80,24 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
   function handleSubmit(e) {
     e.preventDefault()
     if (!form.categoria) { setIntentoEnvio(true); return }
-    console.log('Gasto a guardar:', form)
+
+    const gastoAGuardar = {
+      ...form,
+      importe: importeEnPesos,
+      moneda: form.moneda,
+      cotizacion: esUSD ? parseFloat(form.cotizacion) : null,
+      monto_original: esUSD ? parseFloat(form.importe) : null,
+    }
+
+    console.log('Gasto a guardar:', gastoAGuardar)
     alert('¡Gasto cargado! (todavía no se guarda en la base de datos)')
     onCerrar()
   }
 
   return (
     <>
-      {/* Fondo oscuro detrás del panel */}
       <div className="modal-overlay" onClick={onCerrar} />
 
-      {/* Panel que sube desde abajo */}
       <div className="modal-panel">
         <div className="modal-header">
           <h2>{gastoInicial ? 'Editar gasto' : 'Nuevo gasto'}</h2>
@@ -90,8 +106,9 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
 
         <form className="formulario" onSubmit={handleSubmit}>
 
+          {/* Importe — label cambia si es USD */}
           <div className="campo">
-            <label>Importe</label>
+            <label>{esUSD ? 'Importe en USD' : 'Importe'}</label>
             <input
               type="number"
               inputMode="decimal"
@@ -103,6 +120,41 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
               required
             />
           </div>
+
+          {/* Toggle USD */}
+          <div className="campo campo--toggle">
+            <label>
+              <input
+                type="checkbox"
+                checked={esUSD}
+                onChange={(e) => {
+                  actualizar('moneda', e.target.checked ? 'USD' : 'ARS')
+                  if (!e.target.checked) actualizar('cotizacion', '')
+                }}
+              />
+              Gasto en dólares (USD)
+            </label>
+          </div>
+
+          {/* Cotización — solo si USD */}
+          {esUSD && (
+            <div className="campo">
+              <label>Cotización ($ por dólar)</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="Ej: 1050"
+                min="1"
+                step="1"
+                value={form.cotizacion}
+                onChange={(e) => actualizar('cotizacion', e.target.value)}
+                required
+              />
+              {parseFloat(form.importe) > 0 && parseFloat(form.cotizacion) > 0 && (
+                <p className="preview-cuota">= {formatearPesos(importeEnPesos)} ARS</p>
+              )}
+            </div>
+          )}
 
           <div className="campo">
             <label>Fecha</label>
@@ -156,7 +208,6 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
               ))}
             </div>
 
-            {/* Link discreto — solo aparece si el medio es crédito */}
             {esCredito && !mostrarOpcionMes && (
               <button
                 type="button"
@@ -225,10 +276,10 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
                 onChange={(e) => actualizar('cuotas', e.target.value)}
                 required
               />
-              {form.cuotas >= 2 && form.importe > 0 && (
+              {form.cuotas >= 2 && importeEnPesos > 0 && (
                 <p className="preview-cuota">
-                  {form.cuotas} cuotas de {formatearPesos(form.importe / form.cuotas)}/mes
-                  {form.compartido && ` · ${formatearPesos(form.importe / form.cuotas / 2)} tu parte`}
+                  {form.cuotas} cuotas de {formatearPesos(importeEnPesos / form.cuotas)}/mes
+                  {form.compartido && ` · ${formatearPesos(importeEnPesos / form.cuotas / 2)} tu parte`}
                 </p>
               )}
             </div>
@@ -264,7 +315,6 @@ function FormularioGasto({ onCerrar, compartidoPorDefault = false, gastoInicial 
             </label>
           </div>
 
-          {/* Solo aparece si es recurrente Y compartido */}
           {form.recurrente && form.compartido && (
             <div className="campo">
               <label>¿Quién suele pagarlo?</label>
