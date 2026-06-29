@@ -1,16 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import FormularioGasto from '../components/FormularioGasto'
-import { iconoDeCategoria, USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
-
-// Datos de ejemplo — se reemplazan por Supabase en el Paso 4
-const GASTOS_COMPARTIDOS_EJEMPLO = [
-  { id: 1, descripcion: 'Supermercado Coto', categoria: 'Víveres',  icono: '🛒', importe: 8500,  medio_de_pago: 'Tarjeta Visa BBVA',           fecha: '2026-06-20', pagador: 'Lucas', cuotas_total: null },
-  { id: 3, descripcion: 'Nafta',              categoria: 'Vehículos',icono: '🚗', importe: 15000, medio_de_pago: 'Efectivo',                    fecha: '2026-06-17', pagador: 'Sofi',  cuotas_total: null },
-  { id: 4, descripcion: 'Restaurante',        categoria: 'Salidas',  icono: '🍻', importe: 12000, medio_de_pago: 'Tarjeta Visa BBVA',           fecha: '2026-06-15', pagador: 'Lucas', cuotas_total: 3, cuota_actual: 1 },
-  { id: 7, descripcion: 'Televisor',          categoria: 'Hogar',    icono: '🏠', importe: 120000,medio_de_pago: 'Tarjeta Crédito Mercado Pago', fecha: '2026-06-05', pagador: 'Lucas', cuotas_total: 6, cuota_actual: 1 },
-  { id: 8, descripcion: 'Alquiler',           categoria: 'Hogar',    icono: '🏠', importe: 150000,medio_de_pago: 'Efectivo',                    fecha: '2026-06-01', pagador: 'Sofi',  cuotas_total: null },
-  { id: 9, descripcion: 'Expensas',           categoria: 'Hogar',    icono: '🏠', importe: 28000, medio_de_pago: 'Efectivo',                    fecha: '2026-06-01', pagador: 'Sofi',  cuotas_total: null },
-]
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 function formatearPesos(monto) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto)
@@ -26,29 +17,19 @@ function mitadACargo(gasto) {
   return base / 2
 }
 
-function cantidadPagada(g) {
-  return g.cuotas_total ? g.importe / g.cuotas_total : g.importe
-}
-
-// Panel de categorías dentro de Compartidos
-function PorCategoriaCompartidos({ gastos, onCerrar }) {
+function PorCategoriaCompartidos({ gastos, categorias, onCerrar }) {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null)
-
   const totalGeneral = gastos.reduce((sum, g) => sum + mitadACargo(g), 0)
-
   const porCategoria = Object.entries(
     gastos.reduce((acc, g) => {
-      if (!acc[g.categoria]) acc[g.categoria] = 0
-      acc[g.categoria] += mitadACargo(g)
+      if (!acc[g.categoria_nombre]) acc[g.categoria_nombre] = 0
+      acc[g.categoria_nombre] += mitadACargo(g)
       return acc
     }, {})
-  )
-    .map(([categoria, total]) => ({ categoria, total }))
-    .sort((a, b) => b.total - a.total)
+  ).map(([cat, total]) => ({ cat, total })).sort((a, b) => b.total - a.total)
 
-  const gastosCat = categoriaSeleccionada
-    ? gastos.filter(g => g.categoria === categoriaSeleccionada)
-    : []
+  const gastosCat = categoriaSeleccionada ? gastos.filter(g => g.categoria_nombre === categoriaSeleccionada) : []
+  const emoji = (nombre) => categorias.find(c => c.nombre === nombre)?.emoji ?? '📦'
 
   return (
     <>
@@ -58,46 +39,36 @@ function PorCategoriaCompartidos({ gastos, onCerrar }) {
           <h2>Por categoría</h2>
           <button className="modal-cerrar" onClick={onCerrar}>✕</button>
         </div>
-
         {categoriaSeleccionada ? (
           <div className="panel-interior">
             <div className="panel-interior__header">
               <button className="boton-volver" onClick={() => setCategoriaSeleccionada(null)}>← Volver</button>
-              <h3>{iconoDeCategoria(categoriaSeleccionada)} {categoriaSeleccionada}</h3>
+              <h3>{emoji(categoriaSeleccionada)} {categoriaSeleccionada}</h3>
             </div>
-            <p className="detalle-total">
-              Total: {formatearPesos(gastosCat.reduce((sum, g) => sum + mitadACargo(g), 0))}
-            </p>
+            <p className="detalle-total">Total: {formatearPesos(gastosCat.reduce((sum, g) => sum + mitadACargo(g), 0))}</p>
             <ul className="lista-gastos">
-              {gastosCat.map((gasto) => (
-                <li key={gasto.id} className="gasto-item">
-                  <span className="gasto-item__icono">{gasto.icono}</span>
+              {gastosCat.map(g => (
+                <li key={g.id} className="gasto-item">
+                  <span className="gasto-item__icono">{emoji(g.categoria_nombre)}</span>
                   <div className="gasto-item__info">
-                    <span className="gasto-item__desc">{gasto.descripcion}</span>
-                    <span className="gasto-item__fecha">
-                      {formatearFecha(gasto.fecha)}
-                      {gasto.moneda === 'USD' && gasto.monto_original && ` · USD $${gasto.monto_original}`}
-                      {` · Total: ${formatearPesos(gasto.importe)}`}
-                      {gasto.cuotas_total && ` · Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`}
-                    </span>
-                    <span className="gasto-item__pagador">
-                      {gasto.pagador === USUARIO_ACTUAL ? 'Pagaste vos' : `Pagó ${OTRO_USUARIO}`}
-                    </span>
+                    <span className="gasto-item__desc">{g.descripcion || g.categoria_nombre}</span>
+                    <span className="gasto-item__fecha">{formatearFecha(g.fecha)} · Total: {formatearPesos(g.importe)}</span>
+                    <span className="gasto-item__pagador">{g.esMio ? 'Pagaste vos' : `Pagó ${g.nombrePagador}`}</span>
                   </div>
-                  <span className="gasto-item__importe">{formatearPesos(mitadACargo(gasto))}</span>
+                  <span className="gasto-item__importe">{formatearPesos(mitadACargo(g))}</span>
                 </li>
               ))}
             </ul>
           </div>
         ) : (
           <ul className="lista-categorias">
-            {porCategoria.map(({ categoria, total }) => {
+            {porCategoria.map(({ cat, total }) => {
               const porcentaje = totalGeneral > 0 ? Math.round((total / totalGeneral) * 100) : 0
               return (
-                <li key={categoria} className="categoria-item" onClick={() => setCategoriaSeleccionada(categoria)}>
-                  <span className="categoria-item__icono">{iconoDeCategoria(categoria)}</span>
+                <li key={cat} className="categoria-item" onClick={() => setCategoriaSeleccionada(cat)}>
+                  <span className="categoria-item__icono">{emoji(cat)}</span>
                   <div className="categoria-item__info">
-                    <span className="categoria-item__nombre">{categoria}</span>
+                    <span className="categoria-item__nombre">{cat}</span>
                     <div className="categoria-item__barra-wrap">
                       <div className="categoria-item__barra" style={{ width: `${porcentaje}%` }} />
                     </div>
@@ -117,37 +88,123 @@ function PorCategoriaCompartidos({ gastos, onCerrar }) {
 }
 
 function Compartidos() {
+  const { perfil, pareja, categorias } = useAuth()
+  const ahora = new Date()
+  const [anio, setAnio] = useState(ahora.getFullYear())
+  const [mes, setMes] = useState(ahora.getMonth())
+  const [gastos, setGastos] = useState([])
+  const [pagosDelMes, setPagosDelMes] = useState({ recibidos: 0, enviados: 0 })
+  const [cargando, setCargando] = useState(false)
   const [formularioAbierto, setFormularioAbierto] = useState(false)
   const [porCategoriaAbierto, setPorCategoriaAbierto] = useState(false)
   const [confirmandoSaldar, setConfirmandoSaldar] = useState(false)
+  const [guardandoSaldar, setGuardandoSaldar] = useState(false)
 
-  const totalLucas = GASTOS_COMPARTIDOS_EJEMPLO
-    .filter(g => g.pagador === USUARIO_ACTUAL)
-    .reduce((sum, g) => sum + cantidadPagada(g), 0)
+  useEffect(() => {
+    if (!perfil) return
+    cargarGastos()
+  }, [anio, mes, perfil, pareja])
 
-  const totalSofi = GASTOS_COMPARTIDOS_EJEMPLO
-    .filter(g => g.pagador === OTRO_USUARIO)
-    .reduce((sum, g) => sum + cantidadPagada(g), 0)
+  async function cargarGastos() {
+    setCargando(true)
+    const desde = `${anio}-${String(mes + 1).padStart(2, '0')}-01`
+    const hasta = mes === 11 ? `${anio + 1}-01-01` : `${anio}-${String(mes + 2).padStart(2, '0')}-01`
 
-  const totalCompartido = totalLucas + totalSofi
-  // Positivo: Lucas pagó más → Sofi le debe | Negativo: Sofi pagó más → Lucas le debe
-  const saldo = (totalLucas - totalSofi) / 2
-  const saldoPositivo = saldo > 0
-  const saldoNegativo = saldo < 0
+    const { data: mios } = await supabase
+      .from('gastos')
+      .select('*')
+      .eq('user_id', perfil.id)
+      .eq('compartido', true)
+      .gte('fecha', desde)
+      .lt('fecha', hasta)
+
+    let dePareja = []
+    if (pareja?.id) {
+      const { data } = await supabase
+        .from('gastos')
+        .select('*')
+        .eq('user_id', pareja.id)
+        .eq('compartido', true)
+        .gte('fecha', desde)
+        .lt('fecha', hasta)
+      dePareja = data ?? []
+    }
+
+    if (pareja?.id) {
+      const { data: pagos } = await supabase
+        .from('pagos_saldo')
+        .select('*')
+        .or(`pagador_id.eq.${perfil.id},pagador_id.eq.${pareja.id}`)
+        .gte('fecha', desde)
+        .lt('fecha', hasta)
+
+      const recibidos = (pagos ?? [])
+        .filter(p => p.pagador_id === pareja.id && p.receptor_id === perfil.id && p.tipo === 'pago')
+        .reduce((sum, p) => sum + p.importe, 0)
+      const enviados = (pagos ?? [])
+        .filter(p => p.pagador_id === perfil.id && p.receptor_id === pareja.id && p.tipo === 'pago')
+        .reduce((sum, p) => sum + p.importe, 0)
+      setPagosDelMes({ recibidos, enviados })
+    }
+
+    const normalizados = [
+      ...(mios ?? []).map(g => ({ ...g, esMio: true, nombrePagador: perfil.nombre })),
+      ...dePareja.map(g => ({ ...g, esMio: false, nombrePagador: pareja?.nombre ?? 'Tu pareja' })),
+    ].sort((a, b) => b.fecha.localeCompare(a.fecha))
+
+    setGastos(normalizados)
+    setCargando(false)
+  }
+
+  function mesAnterior() {
+    if (mes === 0) { setMes(11); setAnio(a => a - 1) } else setMes(m => m - 1)
+  }
+  function mesSiguiente() {
+    if (mes === 11) { setMes(0); setAnio(a => a + 1) } else setMes(m => m + 1)
+  }
+
+  const nombreMes = new Date(anio, mes).toLocaleString('es-AR', { month: 'long', year: 'numeric' })
+
+  const totalMio = gastos.filter(g => g.esMio).reduce((sum, g) => {
+    return sum + (g.cuotas_total ? g.importe / g.cuotas_total : g.importe)
+  }, 0)
+  const totalPareja = gastos.filter(g => !g.esMio).reduce((sum, g) => {
+    return sum + (g.cuotas_total ? g.importe / g.cuotas_total : g.importe)
+  }, 0)
+  const totalCompartido = totalMio + totalPareja
+  const rawSaldo = (totalMio - totalPareja) / 2
+  const saldo = rawSaldo - pagosDelMes.recibidos + pagosDelMes.enviados
+  const saldoPositivo = saldo > 0.5
+  const saldoNegativo = saldo < -0.5
+  const nombrePareja = pareja?.nombre ?? 'Tu pareja'
+
+  if (!perfil?.pareja_id) {
+    return (
+      <div className="pagina compartidos">
+        <h1>Compartidos</h1>
+        <p className="sin-gastos" style={{ marginTop: '3rem' }}>
+          Vinculá tu cuenta desde <strong>Configuración</strong> para ver los gastos compartidos.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="pagina compartidos">
-
       <h1>Compartidos</h1>
 
-      {/* Total gastado entre los dos */}
+      <div className="mes-nav">
+        <button className="mes-nav__flecha" onClick={mesAnterior}>‹</button>
+        <span className="mes-nav__nombre">{nombreMes}</span>
+        <button className="mes-nav__flecha" onClick={mesSiguiente}>›</button>
+      </div>
+
       <div className="tarjeta">
         <p className="tarjeta__label">Total gastado entre los dos</p>
-        <p className="tarjeta__monto">{formatearPesos(totalCompartido)}</p>
+        <p className="tarjeta__monto">{cargando ? '...' : formatearPesos(totalCompartido)}</p>
         <p className="tarjeta__detalle">cada uno debería haber puesto {formatearPesos(totalCompartido / 2)}</p>
       </div>
 
-      {/* Saldo neto */}
       <div className={`tarjeta ${saldoPositivo ? 'tarjeta--verde' : saldoNegativo ? 'tarjeta--rojo' : ''}`}>
         <p className="tarjeta__label">
           {saldoPositivo ? 'Te deben' : saldoNegativo ? 'Debés' : 'Están a mano'}
@@ -157,14 +214,13 @@ function Compartidos() {
         </p>
         <p className="tarjeta__detalle">
           {saldoPositivo
-            ? `${OTRO_USUARIO} te debe ${formatearPesos(Math.abs(saldo))}`
+            ? `${nombrePareja} te debe ${formatearPesos(Math.abs(saldo))}`
             : saldoNegativo
-              ? `Le debés ${formatearPesos(Math.abs(saldo))} a ${OTRO_USUARIO}`
+              ? `Le debés ${formatearPesos(Math.abs(saldo))} a ${nombrePareja}`
               : 'Cada uno gastó lo mismo'}
         </p>
       </div>
 
-      {/* Saldar o Reclamar según quién debe — no aparece si están a mano */}
       {saldoPositivo && (
         <button className="boton-saldar boton-saldar--reclamar" onClick={() => setConfirmandoSaldar(true)}>
           Reclamar deuda
@@ -176,7 +232,6 @@ function Compartidos() {
         </button>
       )}
 
-      {/* Modal de confirmación */}
       {confirmandoSaldar && (
         <>
           <div className="modal-overlay" onClick={() => setConfirmandoSaldar(false)} />
@@ -187,78 +242,106 @@ function Compartidos() {
             </div>
             <p className="saldar-confirmacion__texto">
               {saldoPositivo
-                ? `Le vas a avisar a ${OTRO_USUARIO} que te debe ${formatearPesos(Math.abs(saldo))}.`
-                : `Confirmás que le pagaste ${formatearPesos(Math.abs(saldo))} a ${OTRO_USUARIO} y el balance vuelve a cero.`}
+                ? `Le vas a avisar a ${nombrePareja} que te debe ${formatearPesos(Math.abs(saldo))}.`
+                : `Confirmás que le pagaste ${formatearPesos(Math.abs(saldo))} a ${nombrePareja} y el balance vuelve a cero.`}
             </p>
             <div className="saldar-confirmacion__botones">
-              <button className="saldar-confirmacion__cancelar" onClick={() => setConfirmandoSaldar(false)}>
-                Cancelar
-              </button>
+              <button className="saldar-confirmacion__cancelar" onClick={() => setConfirmandoSaldar(false)}>Cancelar</button>
               <button
                 className="saldar-confirmacion__confirmar"
-                onClick={() => { alert('¡Listo! (el balance real se limpia cuando conectemos Supabase)'); setConfirmandoSaldar(false) }}
+                disabled={guardandoSaldar}
+                onClick={async () => {
+                  setGuardandoSaldar(true)
+                  const hoy = new Date().toISOString().split('T')[0]
+                  if (saldoNegativo) {
+                    await supabase.from('pagos_saldo').insert({
+                      pagador_id: perfil.id,
+                      receptor_id: pareja.id,
+                      importe: Math.abs(saldo),
+                      fecha: hoy,
+                      tipo: 'pago',
+                    })
+                    await supabase.from('notificaciones').insert({
+                      de_user_id: perfil.id,
+                      para_user_id: pareja.id,
+                      tipo: 'pago',
+                    })
+                  } else {
+                    await supabase.from('notificaciones').insert({
+                      de_user_id: perfil.id,
+                      para_user_id: pareja.id,
+                      tipo: 'reclamo',
+                    })
+                  }
+                  setGuardandoSaldar(false)
+                  setConfirmandoSaldar(false)
+                  cargarGastos()
+                }}
               >
-                Confirmar
+                {guardandoSaldar ? '...' : 'Confirmar'}
               </button>
             </div>
           </div>
         </>
       )}
 
-      {/* Análisis por categoría */}
       <div className="botones-analisis">
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
           <span>📊</span> Por categoría
         </button>
       </div>
 
-      {/* Lista de gastos compartidos */}
       <div className="seccion">
         <h3 className="seccion__titulo">Detalle</h3>
-        <ul className="lista-gastos">
-          {[...GASTOS_COMPARTIDOS_EJEMPLO].sort((a, b) => b.fecha.localeCompare(a.fecha)).map((gasto) => (
-            <li key={gasto.id} className="gasto-item">
-              <span className="gasto-item__icono">{gasto.icono}</span>
-              <div className="gasto-item__info">
-                <span className="gasto-item__desc">{gasto.descripcion}</span>
-                <span className="gasto-item__fecha">
-                  {formatearFecha(gasto.fecha)}
-                  {gasto.moneda === 'USD' && gasto.monto_original && ` · USD $${gasto.monto_original}`}
-                  {` · Total: ${formatearPesos(gasto.importe)}`}
-                  {gasto.cuotas_total && ` · Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`}
-                </span>
-                <span className="gasto-item__pagador">
-                  {gasto.pagador === USUARIO_ACTUAL ? 'Pagaste vos' : `Pagó ${OTRO_USUARIO}`}
-                </span>
-              </div>
-              <span className="gasto-item__importe">{formatearPesos(mitadACargo(gasto))}</span>
-            </li>
-          ))}
-        </ul>
+        {cargando ? (
+          <p className="sin-gastos">Cargando...</p>
+        ) : gastos.length === 0 ? (
+          <p className="sin-gastos">No hay gastos compartidos este mes</p>
+        ) : (
+          <ul className="lista-gastos">
+            {gastos.map(gasto => {
+              const cat = categorias.find(c => c.nombre === gasto.categoria_nombre)
+              const importeCuota = gasto.cuotas_total ? gasto.importe / gasto.cuotas_total : gasto.importe
+              return (
+                <li key={gasto.id} className="gasto-item">
+                  <span className="gasto-item__icono">{cat?.emoji ?? '📦'}</span>
+                  <div className="gasto-item__info">
+                    <span className="gasto-item__desc">{gasto.descripcion || gasto.categoria_nombre}</span>
+                    <span className="gasto-item__fecha">
+                      {formatearFecha(gasto.fecha)} · Total: {formatearPesos(importeCuota)}
+                      {gasto.cuotas_total && ` · Cuota ${gasto.cuota_numero}/${gasto.cuotas_total}`}
+                    </span>
+                    <span className="gasto-item__pagador">
+                      {gasto.esMio ? 'Pagaste vos' : `Pagó ${gasto.nombrePagador}`}
+                    </span>
+                  </div>
+                  <span className="gasto-item__importe">{formatearPesos(mitadACargo(gasto))}</span>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </div>
 
-      {/* Botón flotante */}
-      <button
-        className="boton-flotante boton-flotante--ancho"
-        onClick={() => setFormularioAbierto(true)}
-      >
+      <button className="boton-flotante boton-flotante--ancho" onClick={() => setFormularioAbierto(true)}>
         + Gasto compartido
       </button>
 
       {formularioAbierto && (
         <FormularioGasto
           onCerrar={() => setFormularioAbierto(false)}
+          onGuardado={cargarGastos}
           compartidoPorDefault={true}
         />
       )}
 
       {porCategoriaAbierto && (
         <PorCategoriaCompartidos
-          gastos={GASTOS_COMPARTIDOS_EJEMPLO}
+          gastos={gastos}
+          categorias={categorias}
           onCerrar={() => setPorCategoriaAbierto(false)}
         />
       )}
-
     </div>
   )
 }

@@ -346,6 +346,79 @@ body {
   margin-top: 0.1rem;
 }
 
+.vinculo-form {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+.vinculo-form__label {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.vinculo-form__fila {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vinculo-form__input {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.vinculo-form__boton {
+  padding: 0.55rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vinculo-form__boton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.vinculo-form__error {
+  font-size: 0.82rem;
+  color: #e74c3c;
+  margin-top: 0.4rem;
+}
+
+.vinculo-activo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+.vinculo-activo__texto {
+  font-size: 0.85rem;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.vinculo-activo__desvincular {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #999;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
 .config-perfil__editar {
   background: none;
   border: 1px solid #ddd;
@@ -740,6 +813,104 @@ body {
   font-size: 0.85rem;
   cursor: pointer;
   color: #333;
+}
+
+.aviso-desvinculado {
+  background: #e74c3c;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.aviso-desvinculado button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.aviso-saldado {
+  background: #27ae60;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.aviso-saldado--reclamo {
+  background: #e67e22;
+}
+
+.aviso-saldado button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.saldar-confirmacion__texto {
+  padding: 0 1.25rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.saldar-confirmacion__botones {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.saldar-confirmacion__cancelar {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.saldar-confirmacion__confirmar {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.saldar-confirmacion__confirmar:disabled {
+  opacity: 0.6;
+}
+
+.banner-recurrentes {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  background: #fff8e1;
+  border: 1.5px solid #f9a825;
+  border-radius: 10px;
+  color: #e65100;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
 }
 
 .grupo-fecha {

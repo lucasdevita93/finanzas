@@ -101,8 +101,9 @@ function PorMedioDePago({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
 
   // Agrupación por medio de pago (solo los de Lucas)
   const porMedioMap = gastosLucas.reduce((acc, g) => {
-    if (!acc[g.medio_de_pago]) acc[g.medio_de_pago] = 0
-    acc[g.medio_de_pago] += aCargo(g)
+    const medio = g.medio_de_pago || 'Sin medio'
+    if (!acc[medio]) acc[medio] = 0
+    acc[medio] += aCargo(g)
     return acc
   }, {})
 

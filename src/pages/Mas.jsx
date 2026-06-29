@@ -1,54 +1,75 @@
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import FormularioGasto from '../components/FormularioGasto'
-import { MEDIOS_DE_PAGO as MEDIOS_INICIALES, CATEGORIAS as CATEGORIAS_INICIALES, USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
-
-// Datos de ejemplo — se reemplazan por Supabase en el Paso 4
-const PERFIL_EJEMPLO = {
-  nombre: USUARIO_ACTUAL,
-  foto: null,
-  vinculadoCon: OTRO_USUARIO,
-}
-
-const RECURRENTES_EJEMPLO = [
-  { id: 1, descripcion: 'Netflix',  icono: '📱', categoria: 'Suscripciones',    medio_de_pago: 'Tarjeta Crédito Mercado Pago', compartido: true,  responsable: 'Lucas', importe: 3200   },
-  { id: 2, descripcion: 'Gym',      icono: '💆', categoria: 'Cuidado Personal', medio_de_pago: 'Efectivo',                    compartido: false, responsable: 'Lucas', importe: 8000   },
-  { id: 3, descripcion: 'Alquiler', icono: '🏠', categoria: 'Hogar',            medio_de_pago: 'Efectivo',                    compartido: true,  responsable: 'Sofi',  importe: 150000 },
-]
+import { CATEGORIAS as CATEGORIAS_INICIALES, USUARIO_ACTUAL } from '../lib/datos'
 
 function Mas() {
-  const [medios, setMedios] = useState(MEDIOS_INICIALES)
-  const [categorias, setCategorias] = useState(CATEGORIAS_INICIALES)
-  const [recurrentes, setRecurrentes] = useState(RECURRENTES_EJEMPLO)
+  const { cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, agregarCategoria, eliminarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
   const [nuevoMedio, setNuevoMedio] = useState({ nombre: '', esCredito: false })
+  const [codigoPareja, setCodigoPareja] = useState('')
+  const [vinculando, setVinculando] = useState(false)
+  const [errorVinculo, setErrorVinculo] = useState('')
+  const [parejaPreview, setParejaPreview] = useState(null)
+  const [copiado, setCopiado] = useState(false)
+  const [solicitudEnviada, setSolicitudEnviada] = useState(false)
+  const [confirmandoDesvincular, setConfirmandoDesvincular] = useState(false)
   const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '', icono: '' })
   const [seccionAbierta, setSeccionAbierta] = useState(null)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(null) // { tipo, id }
   const [recurrenteEditando, setRecurrenteEditando] = useState(null)
 
-  function agregarMedio() {
+  async function handleAgregarMedio() {
     if (!nuevoMedio.nombre.trim()) return
-    setMedios(prev => [...prev, { id: Date.now(), nombre: nuevoMedio.nombre.trim(), esCredito: nuevoMedio.esCredito }])
+    await agregarMedio({ nombre: nuevoMedio.nombre.trim(), es_credito: nuevoMedio.esCredito })
     setNuevoMedio({ nombre: '', esCredito: false })
   }
 
-  function eliminarMedio(id) {
-    setMedios(prev => prev.filter(m => m.id !== id))
+  async function handleBuscar() {
+    if (!codigoPareja.trim()) return
+    setVinculando(true)
+    setErrorVinculo('')
+    const { data, error } = await buscarPorCodigo(codigoPareja.trim().toUpperCase())
+    if (error) setErrorVinculo(error)
+    else setParejaPreview(data)
+    setVinculando(false)
+  }
+
+  async function handleSolicitarVinculo() {
+    setVinculando(true)
+    const { error } = await solicitarVinculo(parejaPreview)
+    if (error) setErrorVinculo(error)
+    else { setSolicitudEnviada(true); setParejaPreview(null); setCodigoPareja('') }
+    setVinculando(false)
+  }
+
+  function handleCopiarCodigo() {
+    navigator.clipboard.writeText(perfil.codigo_vinculacion)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 2000)
+  }
+
+  async function handleDesvincular() {
+    await desvincular()
+  }
+
+  async function handleEliminarMedio(id) {
+    await eliminarMedio(id)
     setConfirmandoEliminar(null)
   }
 
-  function agregarCategoria() {
+  async function handleAgregarCategoria() {
     if (!nuevaCategoria.nombre.trim()) return
-    setCategorias(prev => [...prev, { id: Date.now(), ...nuevaCategoria }])
+    await agregarCategoria({ nombre: nuevaCategoria.nombre.trim(), emoji: nuevaCategoria.icono })
     setNuevaCategoria({ nombre: '', icono: '' })
   }
 
-  function eliminarCategoria(id) {
-    setCategorias(prev => prev.filter(c => c.id !== id))
+  async function handleEliminarCategoria(id) {
+    await eliminarCategoria(id)
     setConfirmandoEliminar(null)
   }
 
-  function eliminarRecurrente(id) {
-    setRecurrentes(prev => prev.filter(r => r.id !== id))
+  async function handleEliminarRecurrente(id) {
+    await eliminarRecurrenteCtx(id)
     setConfirmandoEliminar(null)
   }
 
@@ -65,19 +86,93 @@ function Mas() {
       <div className="config-seccion">
         <div className="config-perfil">
           <div className="config-perfil__avatar">
-            {PERFIL_EJEMPLO.foto
-              ? <img src={PERFIL_EJEMPLO.foto} alt="foto" />
-              : <span>{PERFIL_EJEMPLO.nombre[0]}</span>
-            }
+            <span>{perfil?.nombre?.[0] ?? '?'}</span>
           </div>
           <div className="config-perfil__info">
-            <p className="config-perfil__nombre">{PERFIL_EJEMPLO.nombre}</p>
+            <p className="config-perfil__nombre">{perfil?.nombre ?? '...'}</p>
             <p className="config-perfil__vinculo">
-              Vinculado con {PERFIL_EJEMPLO.vinculadoCon}
+              {perfil?.pareja_id ? `Vinculado con ${pareja?.nombre ?? 'tu pareja'}` : 'Sin vincular aún'}
             </p>
+            {perfil?.codigo_vinculacion && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  Tu código: <strong>{perfil.codigo_vinculacion}</strong>
+                </p>
+                <button onClick={handleCopiarCodigo} style={{ background: 'none', border: 'none', padding: '0.1rem 0.3rem', cursor: 'pointer', color: copiado ? '#27ae60' : '#aaa', fontSize: '1rem', lineHeight: 1 }} title="Copiar código">
+                  {copiado ? '✓' : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
+                </button>
+              </div>
+            )}
           </div>
-          <button className="config-perfil__editar">Editar</button>
         </div>
+
+        {solicitudVinculo && !perfil?.pareja_id && (
+          <div className="vinculo-form" style={{ background: '#f0f7ff', borderRadius: '10px', padding: '0.75rem', marginTop: '0.75rem' }}>
+            <p className="vinculo-form__label"><strong>{solicitudVinculo.nombre}</strong> quiere vincularse con vos</p>
+            <div className="vinculo-form__fila">
+              <button className="vinculo-form__boton" onClick={aceptarVinculo}>Aceptar</button>
+              <button className="vinculo-activo__desvincular" onClick={rechazarVinculo}>Rechazar</button>
+            </div>
+          </div>
+        )}
+
+        {perfil?.pareja_id ? (
+          <div className="vinculo-activo">
+            <p className="vinculo-activo__texto">✓ Vinculado con {pareja?.nombre ?? 'tu pareja'}</p>
+            {confirmandoDesvincular ? (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>¿Desvincular?</span>
+                <button className="config-confirmar-eliminar__si" onClick={() => { handleDesvincular(); setConfirmandoDesvincular(false) }}>Sí</button>
+                <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoDesvincular(false)}>No</button>
+              </div>
+            ) : (
+              <button className="vinculo-activo__desvincular" onClick={() => setConfirmandoDesvincular(true)}>
+                Desvincular
+              </button>
+            )}
+          </div>
+        ) : parejaPreview ? (
+          <div className="vinculo-form">
+            <p className="vinculo-form__label">¿Querés vincularte con <strong>{parejaPreview.nombre}</strong>?</p>
+            <div className="vinculo-form__fila">
+              <button className="vinculo-form__boton" onClick={handleSolicitarVinculo} disabled={vinculando}>
+                {vinculando ? '...' : 'Enviar solicitud'}
+              </button>
+              <button className="vinculo-activo__desvincular" onClick={() => { setParejaPreview(null); setCodigoPareja('') }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : solicitudEnviada ? (
+          <div className="vinculo-form">
+            <p className="vinculo-form__label" style={{ color: '#27ae60' }}>✓ Solicitud enviada. La otra persona debe aceptarla desde su app.</p>
+            <button className="vinculo-activo__desvincular" onClick={() => setSolicitudEnviada(false)}>
+              Enviar a otra persona
+            </button>
+          </div>
+        ) : (
+          <div className="vinculo-form">
+            <p className="vinculo-form__label">Ingresá el código de usuario para vincularte y compartir gastos:</p>
+            <div className="vinculo-form__fila">
+              <input
+                type="text"
+                placeholder="Ej: LUCAS-1234"
+                value={codigoPareja}
+                onChange={e => { setCodigoPareja(e.target.value); setErrorVinculo('') }}
+                onKeyDown={e => e.key === 'Enter' && handleBuscar()}
+                className="vinculo-form__input"
+              />
+              <button
+                className="vinculo-form__boton"
+                onClick={handleBuscar}
+                disabled={vinculando || !codigoPareja.trim()}
+              >
+                {vinculando ? '...' : 'Buscar'}
+              </button>
+            </div>
+            {errorVinculo && <p className="vinculo-form__error">{errorVinculo}</p>}
+          </div>
+        )}
       </div>
 
       {/* Medios de pago */}
@@ -97,12 +192,12 @@ function Mas() {
                 <li key={medio.id} className="config-lista__item">
                   <span>
                     {medio.nombre}
-                    {medio.esCredito && <span className="medio-badge-credito">crédito</span>}
+                    {medio.es_credito && <span className="medio-badge-credito">crédito</span>}
                   </span>
                   {confirmandoEliminar?.tipo === 'medio' && confirmandoEliminar.id === medio.id ? (
                     <div className="config-confirmar-eliminar">
                       <span>¿Eliminar?</span>
-                      <button className="config-confirmar-eliminar__si" onClick={() => eliminarMedio(medio.id)}>Sí</button>
+                      <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarMedio(medio.id)}>Sí</button>
                       <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
                     </div>
                   ) : (
@@ -117,7 +212,7 @@ function Mas() {
                 placeholder="Ej: Tarjeta Visa BBVA"
                 value={nuevoMedio.nombre}
                 onChange={e => setNuevoMedio(prev => ({ ...prev, nombre: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && agregarMedio()}
+                onKeyDown={e => e.key === 'Enter' && handleAgregarMedio()}
               />
               <button
                 type="button"
@@ -126,7 +221,7 @@ function Mas() {
               >
                 💳 Es tarjeta de crédito
               </button>
-              <button onClick={agregarMedio}>+ Agregar</button>
+              <button onClick={handleAgregarMedio}>+ Agregar</button>
             </div>
           </div>
         )}
@@ -147,15 +242,20 @@ function Mas() {
             <ul className="config-lista">
               {categorias.map(cat => (
                 <li key={cat.id} className="config-lista__item">
-                  <span>{cat.icono} {cat.nombre}</span>
-                  {confirmandoEliminar?.tipo === 'categoria' && confirmandoEliminar.id === cat.id ? (
-                    <div className="config-confirmar-eliminar">
-                      <span>¿Eliminar?</span>
-                      <button className="config-confirmar-eliminar__si" onClick={() => eliminarCategoria(cat.id)}>Sí</button>
-                      <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
-                    </div>
-                  ) : (
-                    <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'categoria', id: cat.id })}>✕</button>
+                  <span>
+                    {cat.emoji} {cat.nombre}
+                    {cat.tipo === 'compartida' && <span className="medio-badge-credito">compartida</span>}
+                  </span>
+                  {cat.tipo === 'personal' && (
+                    confirmandoEliminar?.tipo === 'categoria' && confirmandoEliminar.id === cat.id ? (
+                      <div className="config-confirmar-eliminar">
+                        <span>¿Eliminar?</span>
+                        <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarCategoria(cat.id)}>Sí</button>
+                        <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
+                      </div>
+                    ) : (
+                      <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'categoria', id: cat.id })}>✕</button>
+                    )
                   )}
                 </li>
               ))}
@@ -172,9 +272,9 @@ function Mas() {
                 placeholder="Nombre de categoría"
                 value={nuevaCategoria.nombre}
                 onChange={e => setNuevaCategoria(prev => ({ ...prev, nombre: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && agregarCategoria()}
+                onKeyDown={e => e.key === 'Enter' && handleAgregarCategoria()}
               />
-              <button onClick={agregarCategoria}>+ Agregar</button>
+              <button onClick={handleAgregarCategoria}>+ Agregar</button>
             </div>
           </div>
         )}
@@ -192,50 +292,60 @@ function Mas() {
               <p className="sin-gastos">No tenés gastos recurrentes configurados</p>
             ) : (
               <ul className="config-lista">
-                {recurrentes.map(r => (
-                  <li key={r.id} className="config-lista__item">
-                    <span className="config-lista__item-texto">
-                      {r.icono} {r.descripcion}
-                      {r.compartido && <span className="medio-badge-credito">{r.responsable === USUARIO_ACTUAL ? 'vos pagás' : `paga ${r.responsable}`}</span>}
-                    </span>
-                    <div className="config-lista__acciones">
-                      <button
-                        className="config-lista__editar"
-                        onClick={() => setRecurrenteEditando(r)}
-                      >✏️</button>
-                      {confirmandoEliminar?.tipo === 'recurrente' && confirmandoEliminar.id === r.id ? (
-                        <div className="config-confirmar-eliminar">
-                          <span>¿Eliminar?</span>
-                          <button className="config-confirmar-eliminar__si" onClick={() => eliminarRecurrente(r.id)}>Sí</button>
-                          <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
-                        </div>
-                      ) : (
-                        <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'recurrente', id: r.id })}>✕</button>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                {recurrentes.map(r => {
+                  const cat = categorias.find(c => c.nombre === r.categoria_nombre)
+                  return (
+                    <li key={r.id} className="config-lista__item">
+                      <span className="config-lista__item-texto">
+                        {cat?.emoji ?? '📦'} {r.descripcion || r.categoria_nombre}
+                        {r.compartido && <span className="medio-badge-credito">compartido</span>}
+                      </span>
+                      <div className="config-lista__acciones">
+                        <button className="config-lista__editar" onClick={() => setRecurrenteEditando(r)}>✏️</button>
+                        {confirmandoEliminar?.tipo === 'recurrente' && confirmandoEliminar.id === r.id ? (
+                          <div className="config-confirmar-eliminar">
+                            <span>¿Eliminar?</span>
+                            <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarRecurrente(r.id)}>Sí</button>
+                            <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
+                          </div>
+                        ) : (
+                          <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'recurrente', id: r.id })}>✕</button>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
               </ul>
             )}
+            <button
+              className="boton-guardar"
+              style={{ marginTop: '0.75rem' }}
+              onClick={() => setRecurrenteEditando({})}
+            >
+              + Agregar recurrente
+            </button>
           </div>
         )}
       </div>
 
       {/* Cerrar sesión */}
-      <button className="boton-cerrar-sesion">
+      <button className="boton-cerrar-sesion" onClick={cerrarSesion}>
         Cerrar sesión
       </button>
 
-      {recurrenteEditando && (
+      {recurrenteEditando !== null && (
         <FormularioGasto
           onCerrar={() => setRecurrenteEditando(null)}
-          gastoInicial={{
-            ...recurrenteEditando,
-            fecha: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(),
-            recurrente: true,
-            tiene_cuotas: false,
-            cuotas: '',
-          }}
+          onGuardado={() => setRecurrenteEditando(null)}
+          modoRecurrente={true}
+          gastoInicial={recurrenteEditando?.id ? {
+            id: recurrenteEditando.id,
+            importe: recurrenteEditando.importe,
+            categoria: recurrenteEditando.categoria_nombre,
+            descripcion: recurrenteEditando.descripcion,
+            medio_de_pago: recurrenteEditando.medio_de_pago_nombre,
+            compartido: recurrenteEditando.compartido,
+          } : null}
         />
       )}
 
