@@ -4,7 +4,7 @@ import FormularioGasto from '../components/FormularioGasto'
 import { CATEGORIAS as CATEGORIAS_INICIALES, USUARIO_ACTUAL } from '../lib/datos'
 
 function Mas() {
-  const { usuario, cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, agregarCategoria, eliminarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
+  const { usuario, cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, actualizarMedio, agregarCategoria, eliminarCategoria, actualizarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
   const [nuevoMedio, setNuevoMedio] = useState({ nombre: '', esCredito: false })
   const [codigoPareja, setCodigoPareja] = useState('')
   const [vinculando, setVinculando] = useState(false)
@@ -17,6 +17,8 @@ function Mas() {
   const [seccionAbierta, setSeccionAbierta] = useState(null)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(null) // { tipo, id }
   const [recurrenteEditando, setRecurrenteEditando] = useState(null)
+  const [editandoMedio, setEditandoMedio] = useState(null) // { id, nombre, es_credito, nombreOriginal }
+  const [editandoCategoria, setEditandoCategoria] = useState(null) // { id, nombre, emoji, nombreOriginal }
 
   async function handleAgregarMedio() {
     if (!nuevoMedio.nombre.trim()) return
@@ -55,6 +57,18 @@ function Mas() {
   async function handleEliminarMedio(id) {
     await eliminarMedio(id)
     setConfirmandoEliminar(null)
+  }
+
+  async function handleGuardarMedio() {
+    if (!editandoMedio?.nombre?.trim()) return
+    await actualizarMedio(editandoMedio.id, { nombre: editandoMedio.nombre.trim(), es_credito: editandoMedio.es_credito }, editandoMedio.nombreOriginal)
+    setEditandoMedio(null)
+  }
+
+  async function handleGuardarCategoria() {
+    if (!editandoCategoria?.nombre?.trim()) return
+    await actualizarCategoria(editandoCategoria.id, { nombre: editandoCategoria.nombre.trim(), emoji: editandoCategoria.emoji }, editandoCategoria.nombreOriginal)
+    setEditandoCategoria(null)
   }
 
   async function handleAgregarCategoria() {
@@ -194,18 +208,37 @@ function Mas() {
             <ul className="config-lista">
               {medios.map(medio => (
                 <li key={medio.id} className="config-lista__item">
-                  <span>
-                    {medio.nombre}
-                    {medio.es_credito && <span className="medio-badge-credito">crédito</span>}
-                  </span>
-                  {confirmandoEliminar?.tipo === 'medio' && confirmandoEliminar.id === medio.id ? (
-                    <div className="config-confirmar-eliminar">
-                      <span>¿Eliminar?</span>
-                      <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarMedio(medio.id)}>Sí</button>
-                      <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
+                  {editandoMedio?.id === medio.id ? (
+                    <div className="config-editar-inline">
+                      <input
+                        className="config-editar-inline__input"
+                        value={editandoMedio.nombre}
+                        onChange={e => setEditandoMedio(prev => ({ ...prev, nombre: e.target.value }))}
+                        onKeyDown={e => { if (e.key === 'Enter') handleGuardarMedio(); if (e.key === 'Escape') setEditandoMedio(null) }}
+                        autoFocus
+                      />
+                      <button className="config-editar-inline__ok" onClick={handleGuardarMedio}>✓</button>
+                      <button className="config-lista__eliminar" onClick={() => setEditandoMedio(null)}>✕</button>
                     </div>
                   ) : (
-                    <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'medio', id: medio.id })}>✕</button>
+                    <>
+                      <span
+                        className="config-lista__item-texto config-lista__item-texto--editable"
+                        onClick={() => { setEditandoMedio({ id: medio.id, nombre: medio.nombre, es_credito: medio.es_credito, nombreOriginal: medio.nombre }); setConfirmandoEliminar(null) }}
+                      >
+                        {medio.nombre}
+                        {medio.es_credito && <span className="medio-badge-credito">crédito</span>}
+                      </span>
+                      {confirmandoEliminar?.tipo === 'medio' && confirmandoEliminar.id === medio.id ? (
+                        <div className="config-confirmar-eliminar">
+                          <span>¿Eliminar?</span>
+                          <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarMedio(medio.id)}>Sí</button>
+                          <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
+                        </div>
+                      ) : (
+                        <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'medio', id: medio.id })}>✕</button>
+                      )}
+                    </>
                   )}
                 </li>
               ))}
@@ -252,20 +285,45 @@ function Mas() {
             <ul className="config-lista">
               {categorias.map(cat => (
                 <li key={cat.id} className="config-lista__item">
-                  <span>
-                    {cat.emoji} {cat.nombre}
-                    {cat.tipo === 'compartida' && <span className="medio-badge-credito">compartida</span>}
-                  </span>
-                  {cat.tipo === 'personal' && (
-                    confirmandoEliminar?.tipo === 'categoria' && confirmandoEliminar.id === cat.id ? (
-                      <div className="config-confirmar-eliminar">
-                        <span>¿Eliminar?</span>
-                        <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarCategoria(cat.id)}>Sí</button>
-                        <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
-                      </div>
-                    ) : (
-                      <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'categoria', id: cat.id })}>✕</button>
-                    )
+                  {editandoCategoria?.id === cat.id ? (
+                    <div className="config-editar-inline">
+                      <input
+                        className="config-editar-inline__emoji"
+                        value={editandoCategoria.emoji}
+                        onChange={e => setEditandoCategoria(prev => ({ ...prev, emoji: e.target.value }))}
+                        maxLength={2}
+                      />
+                      <input
+                        className="config-editar-inline__input"
+                        value={editandoCategoria.nombre}
+                        onChange={e => setEditandoCategoria(prev => ({ ...prev, nombre: e.target.value }))}
+                        onKeyDown={e => { if (e.key === 'Enter') handleGuardarCategoria(); if (e.key === 'Escape') setEditandoCategoria(null) }}
+                        autoFocus
+                      />
+                      <button className="config-editar-inline__ok" onClick={handleGuardarCategoria}>✓</button>
+                      <button className="config-lista__eliminar" onClick={() => setEditandoCategoria(null)}>✕</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span
+                        className={`config-lista__item-texto${cat.tipo === 'personal' ? ' config-lista__item-texto--editable' : ''}`}
+                        onClick={() => cat.tipo === 'personal' && (setEditandoCategoria({ id: cat.id, nombre: cat.nombre, emoji: cat.emoji, nombreOriginal: cat.nombre }), setConfirmandoEliminar(null))}
+                      >
+                        {cat.emoji} {cat.nombre}
+                        {cat.tipo === 'compartida' && <span className="medio-badge-credito">compartida</span>}
+                      </span>
+                      {cat.tipo === 'personal' && (
+                        confirmandoEliminar?.tipo === 'categoria' && confirmandoEliminar.id === cat.id ? (
+                          <div className="config-confirmar-eliminar">
+                            <span>¿Eliminar?</span>
+                            <button className="config-confirmar-eliminar__si" onClick={() => handleEliminarCategoria(cat.id)}>Sí</button>
+                            <button className="config-confirmar-eliminar__no" onClick={() => setConfirmandoEliminar(null)}>No</button>
+                          </div>
+                        ) : (
+                          <button className="config-lista__eliminar" onClick={() => setConfirmandoEliminar({ tipo: 'categoria', id: cat.id })}>✕</button>
+                        )
+                      )}
+                    </>
                   )}
                 </li>
               ))}

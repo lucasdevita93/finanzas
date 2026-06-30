@@ -516,6 +516,53 @@ body {
   font-weight: 600;
 }
 
+.config-lista__item-texto--editable {
+  cursor: pointer;
+}
+
+.config-lista__item-texto--editable:hover {
+  color: #2563eb;
+}
+
+.config-editar-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.config-editar-inline__input {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1.5px solid #2563eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  background: #f0f6ff;
+}
+
+.config-editar-inline__emoji {
+  width: 2.2rem;
+  padding: 0.3rem 0.2rem;
+  border: 1.5px solid #2563eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+  outline: none;
+  background: #f0f6ff;
+}
+
+.config-editar-inline__ok {
+  background: none;
+  border: none;
+  color: #16a34a;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 .medio-credito-toggle {
   width: 100%;
 }

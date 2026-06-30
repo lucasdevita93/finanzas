@@ -263,6 +263,30 @@ export function AuthProvider({ children }) {
     setCategorias(prev => prev.filter(c => c.id !== id))
   }
 
+  async function actualizarCategoria(id, { nombre, emoji }, nombreAnterior) {
+    const { data } = await supabase
+      .from('categorias')
+      .update({ nombre, emoji })
+      .eq('id', id)
+      .select()
+      .single()
+    if (data) {
+      setCategorias(prev => prev.map(c => c.id === id ? data : c))
+      if (nombre !== nombreAnterior) {
+        await supabase
+          .from('gastos')
+          .update({ categoria_nombre: nombre })
+          .eq('user_id', perfil.id)
+          .eq('categoria_nombre', nombreAnterior)
+        await supabase
+          .from('gastos_recurrentes')
+          .update({ categoria_nombre: nombre })
+          .eq('user_id', perfil.id)
+          .eq('categoria_nombre', nombreAnterior)
+      }
+    }
+  }
+
   async function agregarMedio({ nombre, es_credito }) {
     if (!perfil) return
     const { data } = await supabase
@@ -276,6 +300,25 @@ export function AuthProvider({ children }) {
   async function eliminarMedio(id) {
     await supabase.from('medios_de_pago').delete().eq('id', id)
     setMedios(prev => prev.filter(m => m.id !== id))
+  }
+
+  async function actualizarMedio(id, { nombre, es_credito }, nombreAnterior) {
+    const { data } = await supabase
+      .from('medios_de_pago')
+      .update({ nombre, es_credito })
+      .eq('id', id)
+      .select()
+      .single()
+    if (data) {
+      setMedios(prev => prev.map(m => m.id === id ? data : m))
+      if (nombre !== nombreAnterior) {
+        await supabase
+          .from('gastos')
+          .update({ medio_de_pago_nombre: nombre })
+          .eq('user_id', perfil.id)
+          .eq('medio_de_pago_nombre', nombreAnterior)
+      }
+    }
   }
 
   async function recuperarPassword(email) {
@@ -378,8 +421,8 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       usuario, perfil, pareja, medios, categorias, recurrentes, cargando,
       registrarse, iniciarSesion, loginConGoogle, cerrarSesion,
-      cargarPerfil, cargarMedios, agregarMedio, eliminarMedio,
-      cargarCategorias, agregarCategoria, eliminarCategoria,
+      cargarPerfil, cargarMedios, agregarMedio, eliminarMedio, actualizarMedio,
+      cargarCategorias, agregarCategoria, eliminarCategoria, actualizarCategoria,
       cargarRecurrentes, agregarRecurrente, actualizarRecurrente, eliminarRecurrente,
       buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular,
       solicitudVinculo, avisoDesvinculado, setAvisoDesvinculado,
