@@ -712,11 +712,11 @@ body {
 /* FAB flotante centrado sobre la TabBar */
 .boton-fab {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) + 52px);
+  bottom: calc(env(safe-area-inset-bottom) + 56px);
   left: 50%;
   transform: translateX(-50%);
-  width: 64px;
-  height: 64px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: #2563eb;
   border: 4px solid #fff;
@@ -726,6 +726,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-bottom: 6px;
   z-index: 10;
 }
 
@@ -735,17 +736,17 @@ body {
 
 .boton-fab__plus {
   color: #fff;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 300;
   line-height: 1;
 }
 
 .boton-fab__label {
   color: #fff;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  margin-top: -2px;
+  margin-top: -1px;
 }
 
 /* ── Pantalla Gastos ── */
