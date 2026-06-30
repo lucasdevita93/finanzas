@@ -218,13 +218,19 @@ function Mas() {
                 onChange={e => setNuevoMedio(prev => ({ ...prev, nombre: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && handleAgregarMedio()}
               />
-              <button
-                type="button"
-                className={`chip-credito ${nuevoMedio.esCredito ? 'chip-credito--activo' : ''}`}
-                onClick={() => setNuevoMedio(prev => ({ ...prev, esCredito: !prev.esCredito }))}
-              >
-                💳 Es tarjeta de crédito
-              </button>
+              <div className="medio-credito-toggle">
+                <label className="medio-credito-toggle__label">
+                  <input
+                    type="checkbox"
+                    checked={nuevoMedio.esCredito}
+                    onChange={e => setNuevoMedio(prev => ({ ...prev, esCredito: e.target.checked }))}
+                  />
+                  <span>💳 Es tarjeta de crédito</span>
+                </label>
+                <p className="medio-credito-toggle__info">
+                  Al activarlo, cuando cargues un gasto con esta tarjeta podés ingresar el total una sola vez y dividirlo en la cantidad de cuotas que pagaste. Waldo registra automáticamente una cuota por mes.
+                </p>
+              </div>
               <button onClick={handleAgregarMedio}>+ Agregar</button>
             </div>
           </div>
