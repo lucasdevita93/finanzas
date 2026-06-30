@@ -216,18 +216,32 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             </p>
           )}
 
+          {!modoRecurrente && (
+            <div className="campo campo--fecha">
+              <input
+                type="date"
+                value={form.fecha}
+                onChange={(e) => actualizar('fecha', e.target.value)}
+                required
+              />
+            </div>
+          )}
+
           <div className="campo">
             <label>{esUSD ? 'Importe en USD' : 'Importe'}</label>
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              value={form.importe}
-              onChange={(e) => actualizar('importe', e.target.value)}
-              required
-            />
+            <div className="input-con-prefijo">
+              <span className="input-prefijo">$</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                value={form.importe}
+                onChange={(e) => actualizar('importe', e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="campo campo--toggle">
@@ -260,18 +274,6 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
               {parseFloat(form.importe) > 0 && parseFloat(form.cotizacion) > 0 && (
                 <p className="preview-cuota">= {formatearPesos(importeEnPesos)} ARS</p>
               )}
-            </div>
-          )}
-
-          {!modoRecurrente && (
-            <div className="campo">
-              <label>Fecha</label>
-              <input
-                type="date"
-                value={form.fecha}
-                onChange={(e) => actualizar('fecha', e.target.value)}
-                required
-              />
             </div>
           )}
 

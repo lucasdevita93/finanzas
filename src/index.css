@@ -1249,16 +1249,20 @@ body {
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 1.2rem;
+  position: relative;
 }
 
 .modal-header h2 {
   font-size: 1.2rem;
+  text-align: center;
 }
 
 .modal-cerrar {
+  position: absolute;
+  right: 0;
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -1278,19 +1282,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.6rem 0.2rem;
+  gap: 0.17rem;
+  padding: 0.51rem 0.17rem;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.595rem;
   color: #555;
   text-align: center;
 }
 
 .cat-item__icono {
-  font-size: 1.5rem;
+  font-size: 1.275rem;
 }
 
 .cat-item--activo {
@@ -1357,4 +1361,36 @@ body {
 
 .tab--activo {
   color: #2563eb;
+}
+
+/* Campo fecha compacto */
+.campo--fecha input {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.93rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  width: auto;
+  display: inline-block;
+}
+
+/* Prefijo $ en campo importe */
+.input-con-prefijo {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefijo {
+  position: absolute;
+  left: 0.8rem;
+  font-size: 1rem;
+  color: #1a1a1a;
+  pointer-events: none;
+  font-weight: 500;
+}
+
+.input-con-prefijo input {
+  padding-left: 1.6rem;
+  width: 100%;
 }
