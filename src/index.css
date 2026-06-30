@@ -1338,15 +1338,21 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 0;
+  padding: 0.5rem 0 0.6rem;
   text-decoration: none;
   color: #888;
   font-size: 0.7rem;
-  gap: 2px;
+  gap: 3px;
 }
 
 .tab__icono {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
+}
+
+.tab__imagen {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .tab--activo {
