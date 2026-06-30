@@ -301,14 +301,15 @@ const estiloBoton = {
 
 const estiloInput = {
   padding: '0.8rem 1rem',
-  borderRadius: '10px',
-  border: '1px solid var(--border)',
-  background: 'var(--surface)',
+  borderRadius: '12px',
+  border: '1.5px solid #d1d5db',
+  background: '#ffffff',
   color: 'var(--text)',
   fontSize: '1rem',
   outline: 'none',
   width: '100%',
   boxSizing: 'border-box',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
 }
 
 const estiloGrupo = { display: 'flex', flexDirection: 'column', gap: '0.4rem' }
