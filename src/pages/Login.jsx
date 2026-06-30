@@ -66,7 +66,7 @@ export default function Login() {
       background: 'var(--bg)',
     }}>
       <div style={{ width: '100%', maxWidth: '380px' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '0.25rem', fontSize: '1.8rem' }}>Wally</h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '0.25rem', fontSize: '1.8rem' }}>Waldo</h1>
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
           {sesionRecuperacion ? 'Ingresá tu nueva contraseña'
             : modo === 'login' ? 'Iniciá sesión para continuar'
