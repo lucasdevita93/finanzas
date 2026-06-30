@@ -389,7 +389,7 @@ function Mas() {
               </ul>
             )}
             <div className="config-agregar" style={{ marginTop: '0.75rem' }}>
-              <button onClick={() => setRecurrenteEditando({})}>+ Agregar recurrente</button>
+              <button onClick={() => setRecurrenteEditando({})}>+ Agregar</button>
             </div>
           </div>
         )}
