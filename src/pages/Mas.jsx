@@ -367,12 +367,14 @@ function Mas() {
                   const cat = categorias.find(c => c.nombre === r.categoria_nombre)
                   return (
                     <li key={r.id} className="config-lista__item">
-                      <span className="config-lista__item-texto">
+                      <span
+                        className="config-lista__item-texto config-lista__item-texto--editable"
+                        onClick={() => { setRecurrenteEditando(r); setConfirmandoEliminar(null) }}
+                      >
                         {cat?.emoji ?? '📦'} {r.descripcion || r.categoria_nombre}
                         {r.compartido && <span className="medio-badge-credito">compartido</span>}
                       </span>
                       <div className="config-lista__acciones">
-                        <button className="config-lista__editar" onClick={() => setRecurrenteEditando(r)}>✏️</button>
                         {confirmandoEliminar?.tipo === 'recurrente' && confirmandoEliminar.id === r.id ? (
                           <div className="config-confirmar-eliminar">
                             <span>¿Eliminar?</span>
