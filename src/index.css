@@ -712,7 +712,7 @@ body {
 /* FAB flotante centrado sobre la TabBar */
 .boton-fab {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) + 112px);
+  bottom: calc(env(safe-area-inset-bottom) + 104px);
   left: 50%;
   transform: translateX(-50%);
   width: 70px;
@@ -1338,7 +1338,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0 0.6rem;
+  padding: 0 0 0.6rem;
   text-decoration: none;
   color: #888;
   font-size: 0.7rem;
