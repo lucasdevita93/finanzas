@@ -60,7 +60,7 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '15vh', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', background: 'var(--bg)' }}>
       <div style={{ width: '100%', maxWidth: '380px' }}>
 
         {/* Pantalla de recuperación de contraseña (flujo especial) */}
@@ -92,7 +92,6 @@ export default function Login() {
         {!sesionRecuperacion && modo === 'inicio' && (
           <>
             <h1 style={estiloTitulo}>Waldo</h1>
-            <p style={estiloSubtitulo}>Iniciá sesión para continuar</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
               <button onClick={handleGoogle} style={estiloBoton}>
@@ -106,12 +105,6 @@ export default function Login() {
               </button>
             </div>
 
-            <p style={estiloFooter}>
-              ¿No tenés cuenta?{' '}
-              <button onClick={() => { setModo('registro'); resetForm() }} style={estiloLink}>
-                Registrate
-              </button>
-            </p>
           </>
         )}
 
@@ -228,6 +221,16 @@ export default function Login() {
         )}
 
       </div>
+
+      {/* Footer fijo abajo — solo en pantalla inicial */}
+      {!sesionRecuperacion && modo === 'inicio' && (
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+          ¿No tenés cuenta?{' '}
+          <button onClick={() => { setModo('registro'); resetForm() }} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}>
+            Registrate
+          </button>
+        </p>
+      )}
     </div>
   )
 }
