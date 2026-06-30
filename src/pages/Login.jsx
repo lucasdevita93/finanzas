@@ -284,18 +284,19 @@ const estiloSubtitulo = {
 
 const estiloBoton = {
   width: '100%',
-  padding: '11px 16px',
-  borderRadius: '10px',
-  border: '1px solid var(--border)',
-  background: 'var(--surface)',
+  padding: '13px 16px',
+  borderRadius: '12px',
+  border: '1.5px solid #d1d5db',
+  background: '#ffffff',
   color: 'var(--text)',
-  fontSize: '11.5px',
+  fontSize: '14px',
   fontWeight: '500',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '7px',
+  gap: '8px',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
 }
 
 const estiloInput = {
