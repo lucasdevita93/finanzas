@@ -66,17 +66,17 @@ export default function Login() {
         {/* Mitad superior: título + mascota */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h1 style={estiloTitulo}>Waldo</h1>
-          <img src="/waldo.png" alt="Waldo" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />
+          <img src="/waldo.png" alt="Waldo" style={{ width: '250px', height: '250px', objectFit: 'contain', marginTop: '-8px' }} />
         </div>
 
         {/* Mitad inferior: botones + footer */}
         <div style={{ width: '100%', maxWidth: '380px', padding: '0 2rem 2rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
-            <button onClick={handleGoogle} style={estiloBoton}>
+            <button onClick={handleGoogle} style={estiloBotonPrimario}>
               <IconGoogle />
               Ingresá con Google
             </button>
-            <button onClick={() => { setModo('login'); resetForm() }} style={estiloBoton}>
+            <button onClick={() => { setModo('login'); resetForm() }} style={estiloBotonSecundario}>
               <IconEmail />
               Ingresá con tu email
             </button>
@@ -270,8 +270,8 @@ function IconVolver() {
 
 const estiloTitulo = {
   textAlign: 'center',
-  marginBottom: '0.25rem',
-  fontSize: '3.8rem',
+  marginBottom: '0.1rem',
+  fontSize: '4.6rem',
   fontWeight: '700',
   lineHeight: '1',
 }
@@ -282,21 +282,38 @@ const estiloSubtitulo = {
   fontSize: '0.7rem',
 }
 
-const estiloBoton = {
+const estiloBotonPrimario = {
   width: '100%',
-  padding: '13px 16px',
+  padding: '14px 16px',
   borderRadius: '12px',
   border: '1.5px solid #d1d5db',
   background: '#ffffff',
   color: 'var(--text)',
-  fontSize: '14px',
-  fontWeight: '500',
+  fontSize: '15px',
+  fontWeight: '600',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: '8px',
-  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+}
+
+const estiloBotonSecundario = {
+  width: '100%',
+  padding: '13px 16px',
+  borderRadius: '12px',
+  border: '1px solid #e5e7eb',
+  background: '#ffffff',
+  color: 'var(--text)',
+  fontSize: '14px',
+  fontWeight: '400',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
 }
 
 const estiloInput = {
