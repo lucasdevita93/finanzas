@@ -4,7 +4,7 @@ import FormularioGasto from '../components/FormularioGasto'
 import { CATEGORIAS as CATEGORIAS_INICIALES, USUARIO_ACTUAL } from '../lib/datos'
 
 function Mas() {
-  const { cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, agregarCategoria, eliminarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
+  const { usuario, cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, agregarCategoria, eliminarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
   const [nuevoMedio, setNuevoMedio] = useState({ nombre: '', esCredito: false })
   const [codigoPareja, setCodigoPareja] = useState('')
   const [vinculando, setVinculando] = useState(false)
@@ -86,10 +86,14 @@ function Mas() {
       <div className="config-seccion">
         <div className="config-perfil">
           <div className="config-perfil__avatar">
-            <span>{perfil?.nombre?.[0] ?? '?'}</span>
+            {usuario?.user_metadata?.avatar_url
+              ? <img src={usuario.user_metadata.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              : <span>{perfil?.nombre?.[0] ?? '?'}</span>
+            }
           </div>
           <div className="config-perfil__info">
             <p className="config-perfil__nombre">{perfil?.nombre ?? '...'}</p>
+            {usuario?.email && <p className="config-perfil__email">{usuario.email}</p>}
             <p className="config-perfil__vinculo">
               {perfil?.pareja_id ? `Vinculado con ${pareja?.nombre ?? 'tu pareja'}` : 'Sin vincular aún'}
             </p>

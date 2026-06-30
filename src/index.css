@@ -342,6 +342,12 @@ body {
   font-size: 1rem;
 }
 
+.config-perfil__email {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 0.05rem;
+}
+
 .config-perfil__vinculo {
   font-size: 0.8rem;
   color: #888;
