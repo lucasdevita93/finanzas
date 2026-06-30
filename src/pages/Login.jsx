@@ -59,8 +59,42 @@ export default function Login() {
     return 'Algo salió mal, intentá de nuevo'
   }
 
+  if (!sesionRecuperacion && modo === 'inicio') {
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--bg)' }}>
+
+        {/* Mitad superior: título + mascota */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <h1 style={estiloTitulo}>Waldo</h1>
+          <img src="/waldo.png" alt="Waldo" style={{ width: '200px', height: '200px', objectFit: 'contain' }} />
+        </div>
+
+        {/* Mitad inferior: botones + footer */}
+        <div style={{ width: '100%', maxWidth: '380px', padding: '0 2rem 2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+            <button onClick={handleGoogle} style={estiloBoton}>
+              <IconGoogle />
+              Ingresá con Google
+            </button>
+            <button onClick={() => { setModo('login'); resetForm() }} style={estiloBoton}>
+              <IconEmail />
+              Ingresá con tu email
+            </button>
+          </div>
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+            ¿No tenés cuenta?{' '}
+            <button onClick={() => { setModo('registro'); resetForm() }} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}>
+              Registrate
+            </button>
+          </p>
+        </div>
+
+      </div>
+    )
+  }
+
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '15vh', paddingBottom: '2rem', paddingLeft: '2rem', paddingRight: '2rem', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'var(--bg)' }}>
       <div style={{ width: '100%', maxWidth: '380px' }}>
 
         {/* Pantalla de recuperación de contraseña (flujo especial) */}
@@ -85,26 +119,6 @@ export default function Login() {
                 {cargando ? 'Guardando...' : 'Guardar contraseña'}
               </button>
             </form>
-          </>
-        )}
-
-        {/* Pantalla inicial — dos botones */}
-        {!sesionRecuperacion && modo === 'inicio' && (
-          <>
-            <h1 style={estiloTitulo}>Waldo</h1>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
-              <button onClick={handleGoogle} style={estiloBoton}>
-                <IconGoogle />
-                Ingresá con Google
-              </button>
-
-              <button onClick={() => { setModo('login'); resetForm() }} style={estiloBoton}>
-                <IconEmail />
-                Ingresá con tu email
-              </button>
-            </div>
-
           </>
         )}
 
@@ -222,20 +236,6 @@ export default function Login() {
 
       </div>
 
-      {/* Mascota — solo en pantalla inicial */}
-      {!sesionRecuperacion && modo === 'inicio' && (
-        <img src="/waldo.png" alt="Waldo" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
-      )}
-
-      {/* Footer fijo abajo — solo en pantalla inicial */}
-      {!sesionRecuperacion && modo === 'inicio' && (
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-          ¿No tenés cuenta?{' '}
-          <button onClick={() => { setModo('registro'); resetForm() }} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}>
-            Registrate
-          </button>
-        </p>
-      )}
     </div>
   )
 }
