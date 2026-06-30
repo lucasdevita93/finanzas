@@ -32,6 +32,13 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
+  const [importeDisplay, setImporteDisplay] = useState(() => {
+    if (gastoInicial) {
+      const v = gastoInicial.monto_original ?? gastoInicial.importe
+      return v != null ? new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(v) : ''
+    }
+    return ''
+  })
   const fechaOriginal = useRef(gastoInicial?.fecha ?? hoy())
 
   const [form, setForm] = useState(gastoInicial ? {
@@ -90,6 +97,26 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
 
   function elegirMesCorriente() {
     actualizar('fecha', fechaOriginal.current)
+  }
+
+  function handleImporteChange(e) {
+    setImporteDisplay(e.target.value)
+    const raw = e.target.value.replace(/\./g, '').replace(',', '.')
+    const n = parseFloat(raw)
+    actualizar('importe', isNaN(n) ? '' : n)
+  }
+
+  function handleImporteBlur() {
+    const n = parseFloat(String(form.importe))
+    if (!isNaN(n) && n > 0) {
+      setImporteDisplay(new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(n))
+    }
+  }
+
+  function handleImporteFocus() {
+    if (form.importe !== '' && form.importe != null) {
+      setImporteDisplay(String(form.importe))
+    }
   }
 
   async function handleEliminar() {
@@ -228,34 +255,33 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
           )}
 
           <div className="campo">
-            <label>{esUSD ? 'Importe en USD' : 'Importe'}</label>
-            <div className="input-con-prefijo">
-              <span className="input-prefijo">$</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                value={form.importe}
-                onChange={(e) => actualizar('importe', e.target.value)}
-                required
-              />
+            <label>Importe</label>
+            <div className="importe-fila">
+              <div className="input-con-prefijo">
+                <span className="input-prefijo">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  value={importeDisplay}
+                  onChange={handleImporteChange}
+                  onBlur={handleImporteBlur}
+                  onFocus={handleImporteFocus}
+                  required
+                />
+              </div>
+              <label className="toggle-usd">
+                <input
+                  type="checkbox"
+                  checked={esUSD}
+                  onChange={(e) => {
+                    actualizar('moneda', e.target.checked ? 'USD' : 'ARS')
+                    if (!e.target.checked) actualizar('cotizacion', '')
+                  }}
+                />
+                USD
+              </label>
             </div>
-          </div>
-
-          <div className="campo campo--toggle">
-            <label>
-              <input
-                type="checkbox"
-                checked={esUSD}
-                onChange={(e) => {
-                  actualizar('moneda', e.target.checked ? 'USD' : 'ARS')
-                  if (!e.target.checked) actualizar('cotizacion', '')
-                }}
-              />
-              Gasto en dólares (USD)
-            </label>
           </div>
 
           {esUSD && (
