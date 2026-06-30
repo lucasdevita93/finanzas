@@ -222,6 +222,11 @@ export default function Login() {
 
       </div>
 
+      {/* Mascota — solo en pantalla inicial */}
+      {!sesionRecuperacion && modo === 'inicio' && (
+        <img src="/waldo.png" alt="Waldo" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
+      )}
+
       {/* Footer fijo abajo — solo en pantalla inicial */}
       {!sesionRecuperacion && modo === 'inicio' && (
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
