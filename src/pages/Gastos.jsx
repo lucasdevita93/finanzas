@@ -55,7 +55,6 @@ function Gastos() {
   const [cargando, setCargando] = useState(false)
   const [formularioAbierto, setFormularioAbierto] = useState(false)
   const [gastoEditando, setGastoEditando] = useState(null)
-  const [eliminandoId, setEliminandoId] = useState(null)
   const [porCategoriaAbierto, setPorCategoriaAbierto] = useState(false)
   const [porMedioDePagoAbierto, setPorMedioDePagoAbierto] = useState(false)
   const [recurrentesAbierto, setRecurrentesAbierto] = useState(false)
@@ -98,17 +97,6 @@ function Gastos() {
     setCargando(false)
   }
 
-  async function eliminarGasto(gasto) {
-    if (gasto.cuotas_total) {
-      const padreId = gasto.gasto_padre_id || gasto.id
-      await supabase.from('gastos').delete().or(`id.eq.${padreId},gasto_padre_id.eq.${padreId}`)
-    } else {
-      await supabase.from('gastos').delete().eq('id', gasto.id)
-    }
-    setEliminandoId(null)
-    cargarGastos()
-  }
-
   function abrirEdicion(gasto) {
     setGastoEditando(gasto)
     setFormularioAbierto(true)
@@ -129,7 +117,7 @@ function Gastos() {
     else setMes(m => m + 1)
   }
 
-  const nombreMes = new Date(anio, mes).toLocaleString('es-AR', { month: 'long', year: 'numeric' })
+  const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
   const totalMes = gastos.reduce((sum, g) => sum + importeUsuario(g), 0)
   const grupos = agruparPorFecha(gastos)
 
@@ -196,33 +184,17 @@ function Gastos() {
                   partesSubtitulo.push(`Cuota ${gasto.cuota_actual}/${gasto.cuotas_total}`)
                 }
 
-                const confirmando = eliminandoId === gasto.id
-
                 return (
-                  <li key={gasto.id} className="gasto-item">
-                    {confirmando ? (
-                      <div className="gasto-item__confirmar-eliminar">
-                        <span>¿Eliminar "{gasto.descripcion || gasto.categoria}"?{gasto.cuotas_total ? ' (todas las cuotas)' : ''}</span>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                          <button className="chip chip--activo" onClick={() => eliminarGasto(gasto)}>Eliminar</button>
-                          <button className="chip" onClick={() => setEliminandoId(null)}>Cancelar</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="gasto-item__icono">{gasto.icono}</span>
-                        <div className="gasto-item__info">
-                          <span className="gasto-item__desc">{gasto.descripcion || gasto.categoria}</span>
-                          <span className="gasto-item__fecha">{partesSubtitulo.filter(Boolean).join(' · ')}</span>
-                        </div>
-                        <div className="gasto-item__derecha">
-                          <span className="gasto-item__importe">{formatearPesos(importeVisible)}</span>
-                          {gasto.compartido && <span className="gasto-item__badge">compartido</span>}
-                        </div>
-                        <button className="gasto-item__editar" onClick={() => abrirEdicion(gasto)} aria-label="Editar gasto">✏️</button>
-                        <button className="gasto-item__editar" onClick={() => setEliminandoId(gasto.id)} aria-label="Eliminar gasto">🗑️</button>
-                      </>
-                    )}
+                  <li key={gasto.id} className="gasto-item" onClick={() => abrirEdicion(gasto)}>
+                    <span className="gasto-item__icono">{gasto.icono}</span>
+                    <div className="gasto-item__info">
+                      <span className="gasto-item__desc">{gasto.descripcion || gasto.categoria}</span>
+                      <span className="gasto-item__fecha">{partesSubtitulo.filter(Boolean).join(' · ')}</span>
+                    </div>
+                    <div className="gasto-item__derecha">
+                      <span className="gasto-item__importe">{formatearPesos(importeVisible)}</span>
+                      {gasto.compartido && <span className="gasto-item__badge">compartido</span>}
+                    </div>
                   </li>
                 )
               })}
@@ -232,11 +204,12 @@ function Gastos() {
       )}
 
       <button
-        className="boton-flotante boton-flotante--ancho"
+        className="boton-fab"
         onClick={() => { setGastoEditando(null); setFormularioAbierto(true) }}
         aria-label="Cargar gasto"
       >
-        + Gasto
+        <span className="boton-fab__plus">+</span>
+        <span className="boton-fab__label">Gasto</span>
       </button>
 
       {recurrentesAbierto && (
