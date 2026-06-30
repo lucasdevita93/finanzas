@@ -207,17 +207,10 @@ function Compartidos() {
 
       <div className={`tarjeta ${saldoPositivo ? 'tarjeta--verde' : saldoNegativo ? 'tarjeta--rojo' : ''}`}>
         <p className="tarjeta__label">
-          {saldoPositivo ? 'Te deben' : saldoNegativo ? 'Debés' : 'Están a mano'}
+          {saldoPositivo ? `${nombrePareja} te debe` : saldoNegativo ? `Le debés a ${nombrePareja}` : 'Están a mano'}
         </p>
         <p className={`tarjeta__monto ${saldoPositivo ? 'saldo--positivo' : saldoNegativo ? 'saldo--negativo' : ''}`}>
           {saldo === 0 ? '🤝' : formatearPesos(Math.abs(saldo))}
-        </p>
-        <p className="tarjeta__detalle">
-          {saldoPositivo
-            ? `${nombrePareja} te debe ${formatearPesos(Math.abs(saldo))}`
-            : saldoNegativo
-              ? `Le debés ${formatearPesos(Math.abs(saldo))} a ${nombrePareja}`
-              : 'Cada uno gastó lo mismo'}
         </p>
       </div>
 
@@ -323,8 +316,13 @@ function Compartidos() {
         )}
       </div>
 
-      <button className="boton-flotante boton-flotante--ancho" onClick={() => setFormularioAbierto(true)}>
-        + Gasto compartido
+      <button
+        className="boton-fab boton-fab--verde"
+        onClick={() => setFormularioAbierto(true)}
+        aria-label="Cargar gasto compartido"
+      >
+        <span className="boton-fab__plus">+</span>
+        <span className="boton-fab__label">Gasto</span>
       </button>
 
       {formularioAbierto && (
