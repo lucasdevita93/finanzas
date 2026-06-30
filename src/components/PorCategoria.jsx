@@ -76,7 +76,7 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
     setCategoriaSeleccionada(null)
   }
 
-  const nombreMes = new Date(anio, mes).toLocaleString('es-AR', { month: 'long', year: 'numeric' })
+  const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
 
   const gastosMes = todosLosGastos.filter(g => {
     const [a, m] = g.fecha.split('-').map(Number)

@@ -163,7 +163,7 @@ function Compartidos() {
     if (mes === 11) { setMes(0); setAnio(a => a + 1) } else setMes(m => m + 1)
   }
 
-  const nombreMes = new Date(anio, mes).toLocaleString('es-AR', { month: 'long', year: 'numeric' })
+  const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
 
   const totalMio = gastos.filter(g => g.esMio).reduce((sum, g) => {
     return sum + (g.cuotas_total ? g.importe / g.cuotas_total : g.importe)
