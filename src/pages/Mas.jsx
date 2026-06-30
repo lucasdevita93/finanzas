@@ -205,6 +205,7 @@ function Mas() {
 
         {seccionAbierta === 'medios' && (
           <div className="config-seccion__contenido">
+            <p className="config-hint">Tus medios de pago aparecen al cargar cada gasto. Podés agregar tarjetas, cuentas bancarias o cualquier forma de pago que uses.</p>
             <ul className="config-lista">
               {medios.map(medio => (
                 <li key={medio.id} className="config-lista__item">
@@ -258,7 +259,7 @@ function Mas() {
                     checked={nuevoMedio.esCredito}
                     onChange={e => setNuevoMedio(prev => ({ ...prev, esCredito: e.target.checked }))}
                   />
-                  <span>💳 Es tarjeta de crédito</span>
+                  <span>Es tarjeta de crédito</span>
                 </label>
                 <p className="medio-credito-toggle__info">
                   Al activarlo, cuando cargues un gasto con esta tarjeta podés ingresar el total una sola vez y dividirlo en la cantidad de cuotas que pagaste. Waldo registra automáticamente una cuota por mes.
@@ -282,6 +283,7 @@ function Mas() {
 
         {seccionAbierta === 'categorias' && (
           <div className="config-seccion__contenido">
+            <p className="config-hint">Clasifican tus gastos para ver en qué gastás más. Las marcadas como "compartida" son fijas y aplican a gastos entre los dos.</p>
             <ul className="config-lista">
               {categorias.map(cat => (
                 <li key={cat.id} className="config-lista__item">
@@ -356,6 +358,7 @@ function Mas() {
         </button>
         {seccionAbierta === 'recurrentes' && (
           <div className="config-seccion__contenido">
+            <p className="config-hint">Son gastos que se repiten todos los meses. Cada mes te pedimos confirmarlos antes de registrarlos, por si el importe cambió.</p>
             {recurrentes.length === 0 ? (
               <p className="sin-gastos">No tenés gastos recurrentes configurados</p>
             ) : (
@@ -385,13 +388,9 @@ function Mas() {
                 })}
               </ul>
             )}
-            <button
-              className="boton-guardar"
-              style={{ marginTop: '0.75rem' }}
-              onClick={() => setRecurrenteEditando({})}
-            >
-              + Agregar recurrente
-            </button>
+            <div className="config-agregar" style={{ marginTop: '0.75rem' }}>
+              <button onClick={() => setRecurrenteEditando({})}>+ Agregar recurrente</button>
+            </div>
           </div>
         )}
       </div>
