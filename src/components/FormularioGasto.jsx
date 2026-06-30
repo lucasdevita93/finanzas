@@ -24,7 +24,7 @@ function hoy() {
   return `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`
 }
 
-function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, gastoInicial = null, modoRecurrente = false }) {
+function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, gastoInicial = null, modoRecurrente = false, titulo = null }) {
   const { perfil, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente } = useAuth()
   const [mostrarOpcionMes, setMostrarOpcionMes] = useState(false)
   const [avisoIncompatible, setAvisoIncompatible] = useState(false)
@@ -231,7 +231,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
 
       <div className="modal-panel">
         <div className="modal-header">
-          <h2>{gastoInicial ? 'Editar gasto' : 'Nuevo gasto'}</h2>
+          <h2>{titulo ?? (gastoInicial ? 'Editar gasto' : 'Nuevo gasto')}</h2>
           <button className="modal-cerrar" onClick={onCerrar}>✕</button>
         </div>
 

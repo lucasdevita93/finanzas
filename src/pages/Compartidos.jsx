@@ -321,7 +321,7 @@ function Compartidos() {
         onClick={() => setFormularioAbierto(true)}
         aria-label="Cargar gasto compartido"
       >
-        <span className="boton-fab__plus">+</span>
+        <span className="boton-fab__plus">÷</span>
         <span className="boton-fab__label">Gasto</span>
       </button>
 
@@ -330,6 +330,7 @@ function Compartidos() {
           onCerrar={() => setFormularioAbierto(false)}
           onGuardado={cargarGastos}
           compartidoPorDefault={true}
+          titulo="Nuevo gasto compartido"
         />
       )}
 
