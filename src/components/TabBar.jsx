@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 const tabs = [
   { ruta: '/gastos',      etiqueta: 'Gastos',        img: '/Waldo Gastos B.png' },
   { ruta: '/compartidos', etiqueta: 'Compartidos',   img: '/Waldo Compartidos.png' },
-  { ruta: '/mas',         etiqueta: 'Configuración', icono: '⚙️' },
+  { ruta: '/mas',         etiqueta: 'Configuración', img: '/Waldo Configuración.png' },
 ]
 
 function TabBar() {
