@@ -181,9 +181,8 @@ function Compartidos() {
       </div>
 
       <div className="tarjeta">
-        <p className="tarjeta__label">Total gastado entre los dos</p>
+        <p className="tarjeta__label">Total compartido gastado</p>
         <p className="tarjeta__monto">{cargando ? '...' : formatearPesos(totalCompartido)}</p>
-        <p className="tarjeta__detalle">cada uno debería haber puesto {formatearPesos(totalCompartido / 2)}</p>
       </div>
 
       <div className={`tarjeta tarjeta--balance ${saldoPositivo ? 'tarjeta--verde' : saldoNegativo ? 'tarjeta--rojo' : ''}`}>
