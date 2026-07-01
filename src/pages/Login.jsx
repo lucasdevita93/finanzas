@@ -35,11 +35,18 @@ export default function Login() {
       if (!nombre.trim()) { setError('Ingresá tu nombre'); setCargando(false); return }
       const nombreCompleto = apellido.trim() ? `${nombre.trim()} ${apellido.trim()}` : nombre.trim()
       const { error } = await registrarse({ nombre: nombreCompleto, email, password })
-      if (error) setError(traducirError(error.message))
-      else setMensajeExito('¡Cuenta creada! Revisá tu email para confirmar.')
+      if (error) {
+        console.error('Error al registrarse:', error)
+        setError(traducirError(error.message))
+      } else {
+        setMensajeExito('¡Cuenta creada! Revisá tu email para confirmar.')
+      }
     } else {
       const { error } = await iniciarSesion({ email, password })
-      if (error) setError(traducirError(error.message))
+      if (error) {
+        console.error('Error al iniciar sesión:', error)
+        setError(traducirError(error.message))
+      }
     }
 
     setCargando(false)
@@ -56,7 +63,7 @@ export default function Login() {
     if (msg.includes('Email not confirmed')) return 'Confirmá tu email antes de ingresar'
     if (msg.includes('User already registered')) return 'Ya existe una cuenta con ese email'
     if (msg.includes('Password should be at least')) return 'La contraseña debe tener al menos 8 caracteres'
-    return 'Algo salió mal, intentá de nuevo'
+    return `Algo salió mal, intentá de nuevo (${msg})`
   }
 
   if (!sesionRecuperacion && modo === 'inicio') {
