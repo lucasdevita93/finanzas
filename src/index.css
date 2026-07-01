@@ -1473,6 +1473,18 @@ body {
   color: #2563eb;
 }
 
+/* Hint instructivo en formulario (aparece al activar toggle) */
+.form-hint {
+  font-size: 0.76rem;
+  color: #888;
+  line-height: 1.45;
+  padding: 0.4rem 0.6rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 2px solid #2563eb;
+  margin-top: -0.3rem;
+}
+
 /* Campo fecha compacto */
 .campo--fecha input {
   padding: 0.35rem 0.5rem;

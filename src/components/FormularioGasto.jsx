@@ -25,7 +25,7 @@ function hoy() {
 }
 
 function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, gastoInicial = null, modoRecurrente = false, titulo = null }) {
-  const { perfil, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente } = useAuth()
+  const { perfil, pareja, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente } = useAuth()
   const [mostrarOpcionMes, setMostrarOpcionMes] = useState(false)
   const [avisoIncompatible, setAvisoIncompatible] = useState(false)
   const [intentoEnvio, setIntentoEnvio] = useState(false)
@@ -394,6 +394,10 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             </label>
           </div>}
 
+          {form.tiene_cuotas && !modoRecurrente && (
+            <p className="form-hint">El total se divide en la cantidad de cuotas que elegís. Waldo registra una cuota por mes automáticamente.</p>
+          )}
+
           {avisoIncompatible && !modoRecurrente && (
             <p className="aviso-incompatible">
               Un gasto en cuotas tiene fecha de fin, no puede repetirse cada mes. Solo podés elegir uno.
@@ -433,6 +437,10 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             </label>
           </div>
 
+          {form.compartido && (
+            <p className="form-hint">Este gasto se divide al 50% con {pareja?.nombre ?? 'tu pareja'}. Ambos lo verán en la pantalla de Compartidos. Además, influye en tu espacio personal la parte que te corresponde.</p>
+          )}
+
           {!modoRecurrente && <div className="campo campo--toggle">
             <label>
               <input
@@ -451,6 +459,10 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
               Gasto recurrente (se repite cada mes)
             </label>
           </div>}
+
+          {!modoRecurrente && form.recurrente && (
+            <p className="form-hint">Lo cargás una vez y al inicio de cada mes te vamos a pedir que lo confirmes o ajustes el importe. Ideal para tus gastos fijos.</p>
+          )}
 
           {!modoRecurrente && form.recurrente && form.compartido && (
             <div className="campo">
