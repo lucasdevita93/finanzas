@@ -173,7 +173,7 @@ function Gastos() {
                 const importeVisible = gasto.compartido ? importeCuota / 2 : importeCuota
 
                 const pagoOtro = gasto.compartido && gasto.pagador !== USUARIO_ACTUAL
-                const partesSubtitulo = [pagoOtro ? `Pagó otro` : (gasto.medio_de_pago || '')]
+                const partesSubtitulo = [pagoOtro ? `Pagó ${gasto.pagador}` : (gasto.medio_de_pago || '')]
                 if (gasto.moneda === 'USD' && gasto.monto_original) {
                   partesSubtitulo.push(`USD $${gasto.monto_original}`)
                 }
