@@ -3,6 +3,7 @@ import FormularioGasto from '../components/FormularioGasto'
 import PorCategoria from '../components/PorCategoria'
 import PorMedioDePago from '../components/PorMedioDePago'
 import RecurrentesPendientes from '../components/RecurrentesPendientes'
+import IconoFiltro from '../components/IconoFiltro'
 import { USUARIO_ACTUAL } from '../lib/datos'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -144,14 +145,14 @@ function Gastos() {
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
             <span className="boton-analisis__icono">📊</span>
-            <span className="boton-analisis__filtro">🔽</span>
+            <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Categoría</span>
         </button>
         <button className="boton-analisis" onClick={() => setPorMedioDePagoAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
             <span className="boton-analisis__icono">💳</span>
-            <span className="boton-analisis__filtro">🔽</span>
+            <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Medio de pago</span>
         </button>

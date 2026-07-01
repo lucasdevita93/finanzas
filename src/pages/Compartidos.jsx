@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import FormularioGasto from '../components/FormularioGasto'
+import IconoFiltro from '../components/IconoFiltro'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
@@ -198,7 +199,7 @@ function Compartidos() {
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
             <span className="boton-analisis__icono">📊</span>
-            <span className="boton-analisis__filtro">🔽</span>
+            <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Categoría</span>
         </button>
