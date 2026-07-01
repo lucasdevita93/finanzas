@@ -151,7 +151,7 @@ function Gastos() {
         </button>
         <button className="boton-analisis" onClick={() => setPorMedioDePagoAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
-            <span className="boton-analisis__icono">💳</span>
+            <img src="/Waldo Medios de Pago.png" alt="" className="boton-analisis__mascota" />
             <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Medio de pago</span>

@@ -905,6 +905,12 @@ body {
   line-height: 1;
 }
 
+.boton-analisis__mascota {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .boton-analisis__filtro {
   position: absolute;
   bottom: -2px;
