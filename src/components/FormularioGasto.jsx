@@ -504,7 +504,13 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             {guardando ? 'Guardando...' : gastoInicial ? 'Guardar cambios' : 'Guardar gasto'}
           </button>
 
-          {gastoInicial && (
+          {gastoInicial && gastoInicial.pagador_id !== perfil?.id && (
+            <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#aaa', marginTop: '0.5rem' }}>
+              No es posible eliminar un gasto que no pagaste.
+            </p>
+          )}
+
+          {gastoInicial && gastoInicial.pagador_id === perfil?.id && (
             confirmandoEliminar ? (
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
