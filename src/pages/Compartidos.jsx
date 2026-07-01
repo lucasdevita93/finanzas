@@ -93,12 +93,9 @@ function Compartidos() {
   const [anio, setAnio] = useState(ahora.getFullYear())
   const [mes, setMes] = useState(ahora.getMonth())
   const [gastos, setGastos] = useState([])
-  const [pagosDelMes, setPagosDelMes] = useState({ recibidos: 0, enviados: 0 })
   const [cargando, setCargando] = useState(false)
   const [formularioAbierto, setFormularioAbierto] = useState(false)
   const [porCategoriaAbierto, setPorCategoriaAbierto] = useState(false)
-  const [confirmandoSaldar, setConfirmandoSaldar] = useState(false)
-  const [guardandoSaldar, setGuardandoSaldar] = useState(false)
 
   useEffect(() => {
     if (!perfil) return
@@ -130,23 +127,6 @@ function Compartidos() {
       dePareja = data ?? []
     }
 
-    if (pareja?.id) {
-      const { data: pagos } = await supabase
-        .from('pagos_saldo')
-        .select('*')
-        .or(`pagador_id.eq.${perfil.id},pagador_id.eq.${pareja.id}`)
-        .gte('fecha', desde)
-        .lt('fecha', hasta)
-
-      const recibidos = (pagos ?? [])
-        .filter(p => p.pagador_id === pareja.id && p.receptor_id === perfil.id && p.tipo === 'pago')
-        .reduce((sum, p) => sum + p.importe, 0)
-      const enviados = (pagos ?? [])
-        .filter(p => p.pagador_id === perfil.id && p.receptor_id === pareja.id && p.tipo === 'pago')
-        .reduce((sum, p) => sum + p.importe, 0)
-      setPagosDelMes({ recibidos, enviados })
-    }
-
     const normalizados = [
       ...(mios ?? []).map(g => ({ ...g, esMio: true, nombrePagador: perfil.nombre })),
       ...dePareja.map(g => ({ ...g, esMio: false, nombrePagador: pareja?.nombre ?? 'Tu pareja' })),
@@ -172,8 +152,7 @@ function Compartidos() {
     return sum + (g.cuotas_total ? g.importe / g.cuotas_total : g.importe)
   }, 0)
   const totalCompartido = totalMio + totalPareja
-  const rawSaldo = (totalMio - totalPareja) / 2
-  const saldo = rawSaldo - pagosDelMes.recibidos + pagosDelMes.enviados
+  const saldo = (totalMio - totalPareja) / 2
   const saldoPositivo = saldo > 0.5
   const saldoNegativo = saldo < -0.5
   const nombrePareja = pareja?.nombre ?? 'Tu pareja'
@@ -213,70 +192,6 @@ function Compartidos() {
           {saldo === 0 ? '🤝' : formatearPesos(Math.abs(saldo))}
         </p>
       </div>
-
-      {saldoPositivo && (
-        <button className="boton-saldar boton-saldar--reclamar" onClick={() => setConfirmandoSaldar(true)}>
-          Reclamar deuda
-        </button>
-      )}
-      {saldoNegativo && (
-        <button className="boton-saldar" onClick={() => setConfirmandoSaldar(true)}>
-          Saldar deuda
-        </button>
-      )}
-
-      {confirmandoSaldar && (
-        <>
-          <div className="modal-overlay" onClick={() => setConfirmandoSaldar(false)} />
-          <div className="modal-panel modal-panel--chico">
-            <div className="modal-header">
-              <h2>{saldoPositivo ? 'Reclamar deuda' : 'Saldar deuda'}</h2>
-              <button className="modal-cerrar" onClick={() => setConfirmandoSaldar(false)}>✕</button>
-            </div>
-            <p className="saldar-confirmacion__texto">
-              {saldoPositivo
-                ? `Le vas a avisar a ${nombrePareja} que te debe ${formatearPesos(Math.abs(saldo))}.`
-                : `Confirmás que le pagaste ${formatearPesos(Math.abs(saldo))} a ${nombrePareja} y el balance vuelve a cero.`}
-            </p>
-            <div className="saldar-confirmacion__botones">
-              <button className="saldar-confirmacion__cancelar" onClick={() => setConfirmandoSaldar(false)}>Cancelar</button>
-              <button
-                className="saldar-confirmacion__confirmar"
-                disabled={guardandoSaldar}
-                onClick={async () => {
-                  setGuardandoSaldar(true)
-                  const hoy = new Date().toISOString().split('T')[0]
-                  if (saldoNegativo) {
-                    await supabase.from('pagos_saldo').insert({
-                      pagador_id: perfil.id,
-                      receptor_id: pareja.id,
-                      importe: Math.abs(saldo),
-                      fecha: hoy,
-                      tipo: 'pago',
-                    })
-                    await supabase.from('notificaciones').insert({
-                      de_user_id: perfil.id,
-                      para_user_id: pareja.id,
-                      tipo: 'pago',
-                    })
-                  } else {
-                    await supabase.from('notificaciones').insert({
-                      de_user_id: perfil.id,
-                      para_user_id: pareja.id,
-                      tipo: 'reclamo',
-                    })
-                  }
-                  setGuardandoSaldar(false)
-                  setConfirmandoSaldar(false)
-                  cargarGastos()
-                }}
-              >
-                {guardandoSaldar ? '...' : 'Confirmar'}
-              </button>
-            </div>
-          </div>
-        </>
-      )}
 
       <div className="botones-analisis">
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
