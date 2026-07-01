@@ -63,7 +63,7 @@ export default function Login() {
     if (msg.includes('Email not confirmed')) return 'Confirmá tu email antes de ingresar'
     if (msg.includes('User already registered')) return 'Ya existe una cuenta con ese email'
     if (msg.includes('Password should be at least')) return 'La contraseña debe tener al menos 8 caracteres'
-    return `Algo salió mal, intentá de nuevo (${msg})`
+    return 'Algo salió mal, intentá de nuevo'
   }
 
   if (!sesionRecuperacion && modo === 'inicio') {
