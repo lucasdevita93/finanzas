@@ -27,6 +27,7 @@ function hoy() {
 function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, gastoInicial = null, modoRecurrente = false, titulo = null }) {
   const { perfil, pareja, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente } = useAuth()
   const [mostrarOpcionMes, setMostrarOpcionMes] = useState(false)
+  const [avisoSinPareja, setAvisoSinPareja] = useState(false)
   const [avisoIncompatible, setAvisoIncompatible] = useState(false)
   const [intentoEnvio, setIntentoEnvio] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -427,19 +428,26 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
           )}
 
           <div className="campo campo--toggle">
-            <label style={{ opacity: pareja ? 1 : 0.45 }}>
+            <label>
               <input
                 type="checkbox"
                 checked={form.compartido}
-                disabled={!pareja}
-                onChange={(e) => actualizar('compartido', e.target.checked)}
+                onChange={(e) => {
+                  if (e.target.checked && !pareja) {
+                    setAvisoSinPareja(true)
+                    return
+                  }
+                  setAvisoSinPareja(false)
+                  actualizar('compartido', e.target.checked)
+                }}
               />
               Gasto compartido
             </label>
-            {!pareja && (
-              <p className="form-hint form-hint--gris">Vinculá tu cuenta desde Configuración para compartir gastos.</p>
-            )}
           </div>
+
+          {avisoSinPareja && (
+            <p className="form-hint form-hint--gris">Para cargar un gasto compartido, debés vincularte a otro usuario desde Configuración.</p>
+          )}
 
           {form.compartido && pareja && (
             <p className="form-hint">Este gasto se divide al 50% con {pareja.nombre}. Ambos lo verán en la pantalla de Compartidos. Además, influye en tu espacio personal la parte que te corresponde.</p>
