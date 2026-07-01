@@ -427,18 +427,22 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
           )}
 
           <div className="campo campo--toggle">
-            <label>
+            <label style={{ opacity: pareja ? 1 : 0.45 }}>
               <input
                 type="checkbox"
                 checked={form.compartido}
+                disabled={!pareja}
                 onChange={(e) => actualizar('compartido', e.target.checked)}
               />
               Gasto compartido
             </label>
+            {!pareja && (
+              <p className="form-hint form-hint--gris">Vinculá tu cuenta desde Configuración para compartir gastos.</p>
+            )}
           </div>
 
-          {form.compartido && (
-            <p className="form-hint">Este gasto se divide al 50% con {pareja?.nombre ?? 'tu pareja'}. Ambos lo verán en la pantalla de Compartidos. Además, influye en tu espacio personal la parte que te corresponde.</p>
+          {form.compartido && pareja && (
+            <p className="form-hint">Este gasto se divide al 50% con {pareja.nombre}. Ambos lo verán en la pantalla de Compartidos. Además, influye en tu espacio personal la parte que te corresponde.</p>
           )}
 
           {!modoRecurrente && <div className="campo campo--toggle">

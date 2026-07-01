@@ -1485,6 +1485,11 @@ body {
   margin-top: -0.3rem;
 }
 
+.form-hint--gris {
+  border-left-color: #ccc;
+  margin-top: 0.3rem;
+}
+
 /* Campo fecha compacto */
 .campo--fecha input {
   padding: 0.35rem 0.5rem;
