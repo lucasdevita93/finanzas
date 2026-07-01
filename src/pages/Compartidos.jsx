@@ -186,13 +186,22 @@ function Compartidos() {
         <p className="tarjeta__detalle">cada uno debería haber puesto {formatearPesos(totalCompartido / 2)}</p>
       </div>
 
-      <div className={`tarjeta ${saldoPositivo ? 'tarjeta--verde' : saldoNegativo ? 'tarjeta--rojo' : ''}`}>
-        <p className="tarjeta__label">
-          {saldoPositivo ? `${nombrePareja} te debe` : saldoNegativo ? `Le debés a ${nombrePareja}` : 'Están a mano'}
-        </p>
-        <p className={`tarjeta__monto ${saldoPositivo ? 'saldo--positivo' : saldoNegativo ? 'saldo--negativo' : ''}`}>
-          {saldo === 0 ? '🤝' : formatearPesos(Math.abs(saldo))}
-        </p>
+      <div className={`tarjeta tarjeta--balance ${saldoPositivo ? 'tarjeta--verde' : saldoNegativo ? 'tarjeta--rojo' : ''}`}>
+        <div className="tarjeta__contenido">
+          <p className="tarjeta__label">
+            {saldoPositivo ? `${nombrePareja} te debe` : saldoNegativo ? `Le debés a ${nombrePareja}` : 'Están a mano'}
+          </p>
+          {saldo !== 0 && (
+            <p className={`tarjeta__monto ${saldoPositivo ? 'saldo--positivo' : saldoNegativo ? 'saldo--negativo' : ''}`}>
+              {formatearPesos(Math.abs(saldo))}
+            </p>
+          )}
+        </div>
+        <img
+          src={saldoPositivo ? '/Waldo Acreedor.png' : saldoNegativo ? '/Waldo Debe.png' : '/Waldo Compartidos.png'}
+          alt=""
+          className="tarjeta__mascota"
+        />
       </div>
 
       <div className="botones-analisis">

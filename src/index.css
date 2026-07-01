@@ -134,6 +134,25 @@ body {
   flex-direction: column;
 }
 
+.tarjeta--balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tarjeta__contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+.tarjeta__mascota {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .tarjeta--verde {
   background: #f0fdf4;
 }
