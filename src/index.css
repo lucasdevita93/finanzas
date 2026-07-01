@@ -272,8 +272,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem;
-  min-height: 4.2rem;
+  padding: 0.3rem 1.25rem 0.3rem 0.35rem;
+  min-height: 5.6rem;
   background: #fafafa;
   border: none;
   font-size: 0.95rem;
@@ -289,8 +289,8 @@ body {
 }
 
 .config-seccion__mascota {
-  width: 51px;
-  height: 51px;
+  width: 82px;
+  height: 82px;
   object-fit: contain;
   transform: scaleX(-1);
 }
