@@ -142,10 +142,18 @@ function Gastos() {
 
       <div className="botones-analisis">
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
-          <span>📊</span> Por categoría
+          <span className="boton-analisis__icono-wrap">
+            <span className="boton-analisis__icono">📊</span>
+            <span className="boton-analisis__filtro">🔽</span>
+          </span>
+          <span className="boton-analisis__texto">Categoría</span>
         </button>
         <button className="boton-analisis" onClick={() => setPorMedioDePagoAbierto(true)}>
-          <span>💳</span> Por medio de pago
+          <span className="boton-analisis__icono-wrap">
+            <span className="boton-analisis__icono">💳</span>
+            <span className="boton-analisis__filtro">🔽</span>
+          </span>
+          <span className="boton-analisis__texto">Medio de pago</span>
         </button>
       </div>
 
