@@ -351,7 +351,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
                 className="link-otro-mes"
                 onClick={() => setMostrarOpcionMes(true)}
               >
-                Este gasto se cobra en otro mes
+                Este gasto se paga en otro mes
               </button>
             )}
 
