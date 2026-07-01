@@ -289,9 +289,10 @@ body {
 }
 
 .config-seccion__mascota {
-  width: 44px;
-  height: 44px;
+  width: 51px;
+  height: 51px;
   object-fit: contain;
+  transform: scaleX(-1);
 }
 
 .config-seccion__contenido {
