@@ -95,6 +95,7 @@ function Compartidos() {
   const [gastos, setGastos] = useState([])
   const [cargando, setCargando] = useState(false)
   const [formularioAbierto, setFormularioAbierto] = useState(false)
+  const [gastoEditando, setGastoEditando] = useState(null)
   const [porCategoriaAbierto, setPorCategoriaAbierto] = useState(false)
 
   useEffect(() => {
@@ -211,7 +212,12 @@ function Compartidos() {
               const cat = categorias.find(c => c.nombre === gasto.categoria_nombre)
               const importeCuota = gasto.cuotas_total ? gasto.importe / gasto.cuotas_total : gasto.importe
               return (
-                <li key={gasto.id} className="gasto-item">
+                <li
+                  key={gasto.id}
+                  className="gasto-item"
+                  onClick={gasto.esMio ? () => { setGastoEditando(gasto); setFormularioAbierto(true) } : undefined}
+                  style={gasto.esMio ? { cursor: 'pointer' } : undefined}
+                >
                   <span className="gasto-item__icono">{cat?.emoji ?? '📦'}</span>
                   <div className="gasto-item__info">
                     <span className="gasto-item__desc">{gasto.descripcion || gasto.categoria_nombre}</span>
@@ -233,7 +239,7 @@ function Compartidos() {
 
       <button
         className="boton-fab boton-fab--verde"
-        onClick={() => setFormularioAbierto(true)}
+        onClick={() => { setGastoEditando(null); setFormularioAbierto(true) }}
         aria-label="Cargar gasto compartido"
       >
         <span className="boton-fab__plus">÷</span>
@@ -242,10 +248,11 @@ function Compartidos() {
 
       {formularioAbierto && (
         <FormularioGasto
-          onCerrar={() => setFormularioAbierto(false)}
+          onCerrar={() => { setFormularioAbierto(false); setGastoEditando(null) }}
           onGuardado={cargarGastos}
+          gastoInicial={gastoEditando}
           compartidoPorDefault={true}
-          titulo="Nuevo gasto compartido"
+          titulo={gastoEditando ? null : 'Nuevo gasto compartido'}
         />
       )}
 
