@@ -272,13 +272,26 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
+  min-height: 4.2rem;
   background: #fafafa;
   border: none;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   color: #1a1a1a;
+}
+
+.config-seccion__titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.config-seccion__mascota {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
 }
 
 .config-seccion__contenido {

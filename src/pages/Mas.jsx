@@ -199,7 +199,10 @@ function Mas() {
           className="config-seccion__header"
           onClick={() => toggleSeccion('medios')}
         >
-          <span>💳 Medios de pago</span>
+          <span className="config-seccion__titulo">
+            <img src="/Waldo Medios de Pago.png" alt="" className="config-seccion__mascota" />
+            Medios de pago
+          </span>
           <span>{seccionAbierta === 'medios' ? '▲' : '▼'}</span>
         </button>
 
