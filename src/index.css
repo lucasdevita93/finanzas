@@ -314,6 +314,10 @@ body {
   transform: scaleX(-1);
 }
 
+.config-seccion__mascota--sin-espejo {
+  transform: scaleX(1);
+}
+
 .config-seccion__contenido {
   padding: 0.8rem 1rem 1rem;
   border-top: 1px solid #eee;
