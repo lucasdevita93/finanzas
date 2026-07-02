@@ -206,7 +206,7 @@ function Compartidos() {
       <div className="botones-analisis">
         <button className="boton-analisis" onClick={() => setPorCategoriaAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
-            <span className="boton-analisis__icono">📊</span>
+            <img src="/Waldo Categorías.png" alt="" className="boton-analisis__mascota" />
             <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Categoría</span>

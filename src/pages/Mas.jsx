@@ -280,7 +280,10 @@ function Mas() {
           className="config-seccion__header"
           onClick={() => toggleSeccion('categorias')}
         >
-          <span>📊 Categorías</span>
+          <span className="config-seccion__titulo">
+            <img src="/Waldo Categorías.png" alt="" className="config-seccion__mascota" />
+            Categorías
+          </span>
           <span>{seccionAbierta === 'categorias' ? '▲' : '▼'}</span>
         </button>
 
