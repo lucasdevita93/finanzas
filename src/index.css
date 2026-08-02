@@ -1192,15 +1192,6 @@ body {
   font-weight: 600;
 }
 
-.recurrente-item__editar-link {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 0.8rem;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
 .sin-gastos {
   text-align: center;
   color: #aaa;

@@ -11,9 +11,9 @@ function hoy() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function ItemConfirmar({ r, importe, onCambiarImporte, confirmado, onConfirmar, onDesconfirmar, emoji }) {
+function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, emoji }) {
   return (
-    <li className={`recurrente-item ${confirmado ? 'recurrente-item--confirmado' : ''}`}>
+    <li className={`recurrente-item ${guardado ? 'recurrente-item--confirmado' : ''}`}>
       <div className="recurrente-item__header">
         <span className="recurrente-item__icono">{emoji}</span>
         <div className="recurrente-item__info">
@@ -23,10 +23,10 @@ function ItemConfirmar({ r, importe, onCambiarImporte, confirmado, onConfirmar, 
           </span>
           <span className="recurrente-item__detalle">{r.categoria_nombre} · {r.medio_de_pago_nombre || 'Sin medio'}</span>
         </div>
-        {confirmado && <span className="recurrente-item__ok">✓</span>}
+        {guardado && <span className="recurrente-item__ok">✓</span>}
       </div>
 
-      {!confirmado ? (
+      {!guardado ? (
         <div className="recurrente-item__acciones">
           <input
             type="number"
@@ -35,16 +35,13 @@ function ItemConfirmar({ r, importe, onCambiarImporte, confirmado, onConfirmar, 
             onChange={e => onCambiarImporte(Number(e.target.value))}
             className="recurrente-item__input"
           />
-          <button className="recurrente-item__confirmar" onClick={onConfirmar}>
-            Confirmar
+          <button className="recurrente-item__confirmar" onClick={onConfirmar} disabled={guardando}>
+            {guardando ? 'Guardando...' : 'Confirmar'}
           </button>
         </div>
       ) : (
         <div className="recurrente-item__monto-ok">
           {formatearPesos(importe)}
-          <button className="recurrente-item__editar-link" onClick={onDesconfirmar}>
-            Editar
-          </button>
         </div>
       )}
     </li>
@@ -56,20 +53,14 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
   const [importes, setImportes] = useState(
     Object.fromEntries(recurrentes.map(r => [r.id, r.importe]))
   )
-  const [confirmados, setConfirmados] = useState({})
-  const [guardando, setGuardando] = useState(false)
+  const [guardados, setGuardados] = useState({})
+  const [guardandoId, setGuardandoId] = useState(null)
 
-  function hayConfirmados() {
-    return recurrentes.some(r => confirmados[r.id])
-  }
-
-  async function guardarTodos() {
+  async function confirmarUno(r) {
     if (!perfil) return
-    const recurrentesConfirmados = recurrentes.filter(r => confirmados[r.id])
-    if (recurrentesConfirmados.length === 0) return
-    setGuardando(true)
+    setGuardandoId(r.id)
     try {
-      const gastos = recurrentesConfirmados.map(r => ({
+      const { error } = await supabase.from('gastos').insert({
         user_id: perfil.id,
         pagador_id: perfil.id,
         importe: importes[r.id],
@@ -80,16 +71,15 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
         medio_de_pago_nombre: r.medio_de_pago_nombre || null,
         compartido: r.compartido,
         recurrente_id: r.id,
-      }))
-      const { error } = await supabase.from('gastos').insert(gastos)
+      })
       if (error) throw error
+      setGuardados(prev => ({ ...prev, [r.id]: true }))
       onConfirmado?.()
-      onCerrar()
     } catch (err) {
       console.error(err)
-      alert('No se pudieron guardar los gastos. Intentá de nuevo.')
+      alert('No se pudo guardar el gasto. Intentá de nuevo.')
     } finally {
-      setGuardando(false)
+      setGuardandoId(null)
     }
   }
 
@@ -128,21 +118,13 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
                 emoji={cat?.emoji ?? '📦'}
                 importe={importes[r.id]}
                 onCambiarImporte={val => setImportes(prev => ({ ...prev, [r.id]: val }))}
-                confirmado={!!confirmados[r.id]}
-                onConfirmar={() => setConfirmados(prev => ({ ...prev, [r.id]: true }))}
-                onDesconfirmar={() => setConfirmados(prev => ({ ...prev, [r.id]: false }))}
+                guardado={!!guardados[r.id]}
+                guardando={guardandoId === r.id}
+                onConfirmar={() => confirmarUno(r)}
               />
             )
           })}
         </ul>
-
-        {hayConfirmados() && (
-          <button className="boton-guardar" onClick={guardarTodos} disabled={guardando}>
-            {guardando
-              ? 'Guardando...'
-              : `Cargar ${recurrentes.filter(r => confirmados[r.id]).length} gasto${recurrentes.filter(r => confirmados[r.id]).length > 1 ? 's' : ''} al mes`}
-          </button>
-        )}
       </div>
     </>
   )
