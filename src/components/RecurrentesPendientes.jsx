@@ -59,15 +59,17 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
   const [confirmados, setConfirmados] = useState({})
   const [guardando, setGuardando] = useState(false)
 
-  function todosConfirmados() {
-    return recurrentes.length > 0 && recurrentes.every(r => confirmados[r.id])
+  function hayConfirmados() {
+    return recurrentes.some(r => confirmados[r.id])
   }
 
   async function guardarTodos() {
     if (!perfil) return
+    const recurrentesConfirmados = recurrentes.filter(r => confirmados[r.id])
+    if (recurrentesConfirmados.length === 0) return
     setGuardando(true)
     try {
-      const gastos = recurrentes.map(r => ({
+      const gastos = recurrentesConfirmados.map(r => ({
         user_id: perfil.id,
         pagador_id: perfil.id,
         importe: importes[r.id],
@@ -134,9 +136,11 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
           })}
         </ul>
 
-        {todosConfirmados() && (
+        {hayConfirmados() && (
           <button className="boton-guardar" onClick={guardarTodos} disabled={guardando}>
-            {guardando ? 'Guardando...' : 'Cargar todos al mes'}
+            {guardando
+              ? 'Guardando...'
+              : `Cargar ${recurrentes.filter(r => confirmados[r.id]).length} gasto${recurrentes.filter(r => confirmados[r.id]).length > 1 ? 's' : ''} al mes`}
           </button>
         )}
       </div>
