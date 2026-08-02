@@ -360,7 +360,7 @@ function Mas() {
       <div className="config-seccion">
         <button className="config-seccion__header" onClick={() => toggleSeccion('recurrentes')}>
           <span className="config-seccion__titulo">
-            <img src="/Waldo Recurrentes.png" alt="" className="config-seccion__mascota config-seccion__mascota--sin-espejo" />
+            <img src="/Waldo Recurrentes.png" alt="" className="config-seccion__mascota config-seccion__mascota--sin-espejo config-seccion__mascota--recurrentes" />
             Gastos recurrentes
           </span>
           <span>{seccionAbierta === 'recurrentes' ? '▲' : '▼'}</span>

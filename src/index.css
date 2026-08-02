@@ -318,6 +318,11 @@ body {
   transform: scaleX(1);
 }
 
+.config-seccion__mascota--recurrentes {
+  width: 104px;
+  height: 104px;
+}
+
 .config-seccion__contenido {
   padding: 0.8rem 1rem 1rem;
   border-top: 1px solid #eee;
