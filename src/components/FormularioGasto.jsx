@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import { CATEGORIAS, USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
@@ -25,7 +24,7 @@ function hoy() {
 }
 
 function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, gastoInicial = null, modoRecurrente = false, titulo = null }) {
-  const { perfil, pareja, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente } = useAuth()
+  const { perfil, pareja, medios: MEDIOS_DE_PAGO, categorias: todasCategorias, agregarRecurrente, actualizarRecurrente, eliminarRecurrente } = useAuth()
   const [mostrarOpcionMes, setMostrarOpcionMes] = useState(false)
   const [avisoSinPareja, setAvisoSinPareja] = useState(false)
   const [avisoIncompatible, setAvisoIncompatible] = useState(false)
@@ -47,9 +46,9 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
     importe: gastoInicial.monto_original ?? gastoInicial.importe,
     moneda: gastoInicial.moneda ?? 'ARS',
     cotizacion: gastoInicial.cotizacion ?? '',
-    categoria: gastoInicial.categoria,
+    categoria: gastoInicial.categoria ?? gastoInicial.categoria_nombre,
     descripcion: gastoInicial.descripcion,
-    medio_de_pago: gastoInicial.medio_de_pago,
+    medio_de_pago: gastoInicial.medio_de_pago ?? gastoInicial.medio_de_pago_nombre,
     tiene_cuotas: false,
     cuotas: '',
     compartido: gastoInicial.compartido,
@@ -123,7 +122,9 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
   async function handleEliminar() {
     setGuardando(true)
     try {
-      if (gastoInicial.cuotas_total) {
+      if (modoRecurrente) {
+        await eliminarRecurrente(gastoInicial.id)
+      } else if (gastoInicial.cuotas_total) {
         const padreId = gastoInicial.gasto_padre_id || gastoInicial.id
         await supabase.from('gastos').delete().or(`id.eq.${padreId},gasto_padre_id.eq.${padreId}`)
       } else {
@@ -476,23 +477,23 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             <p className="form-hint">Lo cargás una vez y al inicio de cada mes te vamos a pedir que lo confirmes o ajustes el importe. Ideal para tus gastos fijos.</p>
           )}
 
-          {!modoRecurrente && form.recurrente && form.compartido && (
+          {!modoRecurrente && form.recurrente && form.compartido && pareja && (
             <div className="campo">
               <label>¿Quién suele pagarlo?</label>
               <div className="chips">
                 <button
                   type="button"
-                  className={`chip ${form.responsable === USUARIO_ACTUAL ? 'chip--activo' : ''}`}
-                  onClick={() => actualizar('responsable', USUARIO_ACTUAL)}
+                  className={`chip ${form.responsable === perfil?.id ? 'chip--activo' : ''}`}
+                  onClick={() => actualizar('responsable', perfil?.id)}
                 >
                   Yo
                 </button>
                 <button
                   type="button"
-                  className={`chip ${form.responsable === OTRO_USUARIO ? 'chip--activo' : ''}`}
-                  onClick={() => actualizar('responsable', OTRO_USUARIO)}
+                  className={`chip ${form.responsable === pareja?.id ? 'chip--activo' : ''}`}
+                  onClick={() => actualizar('responsable', pareja?.id)}
                 >
-                  {OTRO_USUARIO}
+                  {pareja.nombre}
                 </button>
               </div>
             </div>
@@ -514,8 +515,9 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             confirmandoEliminar ? (
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-                  ¿Eliminar "{gastoInicial.descripcion || gastoInicial.categoria}"?
-                  {gastoInicial.cuotas_total ? ' (todas las cuotas)' : ''}
+                  {modoRecurrente
+                    ? `¿Eliminar "${form.descripcion || form.categoria}"? Deja de repetirse cada mes.`
+                    : `¿Eliminar "${form.descripcion || form.categoria}"?${gastoInicial.cuotas_total ? ' (todas las cuotas)' : ''}`}
                 </p>
                 <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                   <button type="button" className="chip chip--activo" onClick={handleEliminar}>Eliminar</button>
@@ -528,7 +530,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
                 onClick={() => setConfirmandoEliminar(true)}
                 style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer', fontSize: '0.9rem', marginTop: '0.25rem', width: '100%' }}
               >
-                Eliminar gasto
+                {modoRecurrente ? 'Eliminar recurrente' : 'Eliminar gasto'}
               </button>
             )
           )}

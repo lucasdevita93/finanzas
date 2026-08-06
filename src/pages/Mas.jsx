@@ -416,14 +416,7 @@ function Mas() {
           onCerrar={() => setRecurrenteEditando(null)}
           onGuardado={() => setRecurrenteEditando(null)}
           modoRecurrente={true}
-          gastoInicial={recurrenteEditando?.id ? {
-            id: recurrenteEditando.id,
-            importe: recurrenteEditando.importe,
-            categoria: recurrenteEditando.categoria_nombre,
-            descripcion: recurrenteEditando.descripcion,
-            medio_de_pago: recurrenteEditando.medio_de_pago_nombre,
-            compartido: recurrenteEditando.compartido,
-          } : null}
+          gastoInicial={recurrenteEditando?.id ? recurrenteEditando : null}
         />
       )}
 

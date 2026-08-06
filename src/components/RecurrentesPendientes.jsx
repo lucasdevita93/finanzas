@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import FormularioGasto from './FormularioGasto'
 
 function formatearPesos(monto) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto)
@@ -11,10 +12,10 @@ function hoy() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, emoji }) {
+function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, onEditar, emoji }) {
   return (
     <li className={`recurrente-item ${guardado ? 'recurrente-item--confirmado' : ''}`}>
-      <div className="recurrente-item__header">
+      <div className="recurrente-item__header" onClick={onEditar} style={{ cursor: 'pointer' }}>
         <span className="recurrente-item__icono">{emoji}</span>
         <div className="recurrente-item__info">
           <span className="recurrente-item__nombre">
@@ -55,6 +56,7 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
   )
   const [guardados, setGuardados] = useState({})
   const [guardandoId, setGuardandoId] = useState(null)
+  const [editando, setEditando] = useState(null)
 
   async function confirmarUno(r) {
     if (!perfil) return
@@ -83,7 +85,7 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
     }
   }
 
-  if (recurrentes.length === 0) {
+  if (recurrentes.length === 0 && !editando) {
     return (
       <>
         <div className="modal-overlay" onClick={onCerrar} />
@@ -121,11 +123,22 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
                 guardado={!!guardados[r.id]}
                 guardando={guardandoId === r.id}
                 onConfirmar={() => confirmarUno(r)}
+                onEditar={() => setEditando(r)}
               />
             )
           })}
         </ul>
       </div>
+
+      {editando && (
+        <FormularioGasto
+          modoRecurrente
+          gastoInicial={editando}
+          titulo="Editar gasto recurrente"
+          onCerrar={() => setEditando(null)}
+          onGuardado={() => { setEditando(null); onConfirmado?.() }}
+        />
+      )}
     </>
   )
 }
