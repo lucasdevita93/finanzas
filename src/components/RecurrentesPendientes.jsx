@@ -57,7 +57,7 @@ function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onCo
 }
 
 function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, onConfirmado }) {
-  const { perfil, categorias } = useAuth()
+  const { perfil, categorias, actualizarRecurrente } = useAuth()
   const [importes, setImportes] = useState(
     Object.fromEntries(recurrentes.map(r => [r.id, r.importe]))
   )
@@ -82,6 +82,9 @@ function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, on
         recurrente_id: r.id,
       })
       if (error) throw error
+      if (importes[r.id] !== r.importe) {
+        await actualizarRecurrente(r.id, { importe: importes[r.id] })
+      }
       setGuardados(prev => ({ ...prev, [r.id]: true }))
       onConfirmado?.()
     } catch (err) {
