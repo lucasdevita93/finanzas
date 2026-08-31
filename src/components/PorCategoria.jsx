@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { iconoDeCategoria, USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
+import { USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
+import { useAuth } from '../context/AuthContext'
 
 function aCargo(gasto) {
   const base = gasto.cuotas_total ? gasto.importe / gasto.cuotas_total : gasto.importe
@@ -23,7 +24,7 @@ function formatearFecha(fechaStr) {
   return new Date(anio, mes - 1, dia).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
 }
 
-function DetalleCategoria({ categoria, gastos, onVolver }) {
+function DetalleCategoria({ categoria, gastos, onVolver, emoji }) {
   const gastosCategoria = gastos.filter(g => g.categoria === categoria)
   const totalCategoria = gastosCategoria.reduce((sum, g) => sum + aCargo(g), 0)
 
@@ -31,7 +32,7 @@ function DetalleCategoria({ categoria, gastos, onVolver }) {
     <div className="panel-interior">
       <div className="panel-interior__header">
         <button className="boton-volver" onClick={onVolver}>← Volver</button>
-        <h3>{iconoDeCategoria(categoria)} {categoria}</h3>
+        <h3>{emoji} {categoria}</h3>
       </div>
       <p className="detalle-total">Total: {formatearPesos(totalCategoria)}</p>
       <ul className="lista-gastos">
@@ -60,9 +61,14 @@ function DetalleCategoria({ categoria, gastos, onVolver }) {
 }
 
 function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
+  const { categorias } = useAuth()
   const [anio, setAnio] = useState(anioInicial)
   const [mes, setMes] = useState(mesInicial)
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null)
+
+  function emojiDe(nombre) {
+    return categorias.find(c => c.nombre === nombre)?.emoji ?? '📦'
+  }
 
   function mesAnterior() {
     if (mes === 0) { setMes(11); setAnio(a => a - 1) }
@@ -117,6 +123,7 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
             categoria={categoriaSeleccionada}
             gastos={gastosMes}
             onVolver={() => setCategoriaSeleccionada(null)}
+            emoji={emojiDe(categoriaSeleccionada)}
           />
         ) : porCategoria.length === 0 ? (
           <p className="sin-gastos">No hay gastos en este mes</p>
@@ -126,7 +133,7 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
               const porcentaje = totalGeneral > 0 ? Math.round((total / totalGeneral) * 100) : 0
               return (
                 <li key={categoria} className="categoria-item" onClick={() => setCategoriaSeleccionada(categoria)}>
-                  <span className="categoria-item__icono">{iconoDeCategoria(categoria)}</span>
+                  <span className="categoria-item__icono">{emojiDe(categoria)}</span>
                   <div className="categoria-item__info">
                     <span className="categoria-item__nombre">{categoria}</span>
                     <div className="categoria-item__barra-wrap">
