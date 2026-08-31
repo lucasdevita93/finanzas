@@ -122,10 +122,7 @@ function Gastos() {
   const totalMes = gastos.reduce((sum, g) => sum + importeUsuario(g), 0)
   const grupos = agruparPorFecha(gastos)
 
-  const esEsteMes = anio === ahora.getFullYear() && mes === ahora.getMonth()
-  const recurrentesPendientes = esEsteMes
-    ? recurrentes.filter(r => !gastos.some(g => g.recurrente_id === r.id))
-    : []
+  const recurrentesPendientes = recurrentes.filter(r => !gastos.some(g => g.recurrente_id === r.id))
 
   return (
     <div className="pagina gastos">
@@ -224,6 +221,9 @@ function Gastos() {
       {recurrentesAbierto && (
         <RecurrentesPendientes
           recurrentes={recurrentesPendientes}
+          anio={anio}
+          mes={mes}
+          nombreMes={nombreMes}
           onCerrar={() => setRecurrentesAbierto(false)}
           onConfirmado={cargarGastos}
         />

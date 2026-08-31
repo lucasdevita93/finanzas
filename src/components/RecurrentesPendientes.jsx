@@ -12,6 +12,13 @@ function hoy() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function fechaParaConfirmar(anio, mes) {
+  const ahora = new Date()
+  const esMesActual = anio === ahora.getFullYear() && mes === ahora.getMonth()
+  if (esMesActual) return hoy()
+  return `${anio}-${String(mes + 1).padStart(2, '0')}-01`
+}
+
 function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, onEditar, emoji }) {
   return (
     <li className={`recurrente-item ${guardado ? 'recurrente-item--confirmado' : ''}`}>
@@ -49,7 +56,7 @@ function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onCo
   )
 }
 
-function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
+function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, onConfirmado }) {
   const { perfil, categorias } = useAuth()
   const [importes, setImportes] = useState(
     Object.fromEntries(recurrentes.map(r => [r.id, r.importe]))
@@ -67,7 +74,7 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
         pagador_id: perfil.id,
         importe: importes[r.id],
         moneda: 'ARS',
-        fecha: hoy(),
+        fecha: fechaParaConfirmar(anio, mes),
         descripcion: r.descripcion || null,
         categoria_nombre: r.categoria_nombre,
         medio_de_pago_nombre: r.medio_de_pago_nombre || null,
@@ -94,7 +101,7 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
             <h2>Gastos recurrentes</h2>
             <button className="modal-cerrar" onClick={onCerrar}>✕</button>
           </div>
-          <p className="sin-gastos">No hay recurrentes pendientes este mes.</p>
+          <p className="sin-gastos">No hay recurrentes pendientes{nombreMes ? ` en ${nombreMes}` : ' este mes'}.</p>
         </div>
       </>
     )
@@ -109,7 +116,9 @@ function RecurrentesPendientes({ recurrentes, onCerrar, onConfirmado }) {
           <button className="modal-cerrar" onClick={onCerrar}>✕</button>
         </div>
 
-        <p className="recurrentes__seccion-titulo">Confirmá el importe de este mes</p>
+        <p className="recurrentes__seccion-titulo">
+          Confirmá el importe{nombreMes ? ` de ${nombreMes}` : ' de este mes'}
+        </p>
         <ul className="recurrentes-lista">
           {recurrentes.map(r => {
             const cat = categorias.find(c => c.nombre === r.categoria_nombre)
