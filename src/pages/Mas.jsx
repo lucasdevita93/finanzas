@@ -3,6 +3,10 @@ import { useAuth } from '../context/AuthContext'
 import FormularioGasto from '../components/FormularioGasto'
 import { CATEGORIAS as CATEGORIAS_INICIALES, USUARIO_ACTUAL } from '../lib/datos'
 
+function formatearPesos(monto) {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto)
+}
+
 function Mas() {
   const { usuario, cerrarSesion, perfil, pareja, medios, categorias, recurrentes, agregarMedio, eliminarMedio, actualizarMedio, agregarCategoria, eliminarCategoria, actualizarCategoria, eliminarRecurrente: eliminarRecurrenteCtx, buscarPorCodigo, solicitarVinculo, aceptarVinculo, rechazarVinculo, desvincular, solicitudVinculo } = useAuth()
   const [nuevoMedio, setNuevoMedio] = useState({ nombre: '', esCredito: false })
@@ -371,7 +375,16 @@ function Mas() {
             {recurrentes.length === 0 ? (
               <p className="sin-gastos">No tenés gastos recurrentes configurados</p>
             ) : (
-              <ul className="config-lista">
+              <>
+                <div className="recurrentes-total">
+                  <span>Total mensual: <strong>{formatearPesos(recurrentes.reduce((sum, r) => sum + r.importe, 0))}</strong></span>
+                  {recurrentes.some(r => r.compartido) && (
+                    <span className="recurrentes-total__parte">
+                      Tu parte: {formatearPesos(recurrentes.reduce((sum, r) => sum + (r.compartido ? r.importe / 2 : r.importe), 0))}
+                    </span>
+                  )}
+                </div>
+                <ul className="config-lista">
                 {recurrentes.map(r => {
                   const cat = categorias.find(c => c.nombre === r.categoria_nombre)
                   return (
@@ -384,6 +397,7 @@ function Mas() {
                         {r.compartido && <span className="medio-badge-credito">compartido</span>}
                       </span>
                       <div className="config-lista__acciones">
+                        <span className="recurrentes-importe">{formatearPesos(r.importe)}</span>
                         {confirmandoEliminar?.tipo === 'recurrente' && confirmandoEliminar.id === r.id ? (
                           <div className="config-confirmar-eliminar">
                             <span>¿Eliminar?</span>
@@ -398,6 +412,7 @@ function Mas() {
                   )
                 })}
               </ul>
+              </>
             )}
             <div className="config-agregar" style={{ marginTop: '0.75rem' }}>
               <button onClick={() => setRecurrenteEditando({})}>+ Agregar</button>

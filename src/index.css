@@ -471,6 +471,29 @@ body {
   font-size: 0.9rem;
 }
 
+.recurrentes-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.6rem;
+  background: #f0f4ff;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.recurrentes-total__parte {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.recurrentes-importe {
+  font-size: 0.82rem;
+  color: #888;
+  white-space: nowrap;
+}
+
 .config-lista__item-texto {
   flex: 1;
 }
