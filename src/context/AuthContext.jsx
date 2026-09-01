@@ -356,20 +356,15 @@ export function AuthProvider({ children }) {
 
   async function solicitarVinculo(parejaData) {
     if (!perfil) return { error: 'No hay perfil cargado' }
-    const { error } = await supabase
-      .from('perfiles')
-      .update({ vinculo_pendiente_de: perfil.id })
-      .eq('id', parejaData.id)
+    const { error } = await supabase.rpc('solicitar_vinculo', { destino_id: parejaData.id })
     if (error) return { error: 'No se pudo enviar la solicitud. Intentá de nuevo.' }
     return { error: null }
   }
 
   async function aceptarVinculo() {
     if (!perfil?.vinculo_pendiente_de) return { error: 'No hay solicitud pendiente' }
-    const solicitanteId = perfil.vinculo_pendiente_de
-    const { error: e1 } = await supabase.from('perfiles').update({ pareja_id: solicitanteId, vinculo_pendiente_de: null }).eq('id', perfil.id)
-    const { error: e2 } = await supabase.from('perfiles').update({ pareja_id: perfil.id }).eq('id', solicitanteId)
-    if (e1 || e2) return { error: 'No se pudo vincular. Intentá de nuevo.' }
+    const { error } = await supabase.rpc('aceptar_vinculo')
+    if (error) return { error: 'No se pudo vincular. Intentá de nuevo.' }
     const { data: perfilActualizado } = await supabase.from('perfiles').select('*').eq('id', perfil.id).single()
     setPerfil(perfilActualizado)
     setPareja(solicitudVinculo)
@@ -388,8 +383,7 @@ export function AuthProvider({ children }) {
   async function desvincular() {
     if (!perfil?.pareja_id) return
     desvinculandoRef.current = true
-    await supabase.from('perfiles').update({ pareja_id: null }).eq('id', perfil.id)
-    await supabase.from('perfiles').update({ pareja_id: null }).eq('id', perfil.pareja_id)
+    await supabase.rpc('desvincular_pareja')
     setPerfil(prev => ({ ...prev, pareja_id: null }))
     setPareja(null)
     parejaRef.current = null
