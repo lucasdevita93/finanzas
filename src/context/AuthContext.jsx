@@ -225,8 +225,13 @@ export function AuthProvider({ children }) {
   }
 
   async function eliminarRecurrente(id) {
-    await supabase.from('gastos_recurrentes').delete().eq('id', id)
+    const { error } = await supabase.from('gastos_recurrentes').delete().eq('id', id)
+    if (error) {
+      console.error('Error al eliminar recurrente:', error)
+      return { error }
+    }
     setRecurrentes(prev => prev.filter(r => r.id !== id))
+    return { error: null }
   }
 
   async function cargarCategorias(userId) {

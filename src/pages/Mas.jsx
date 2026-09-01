@@ -87,7 +87,11 @@ function Mas() {
   }
 
   async function handleEliminarRecurrente(id) {
-    await eliminarRecurrenteCtx(id)
+    const { error } = await eliminarRecurrenteCtx(id)
+    if (error) {
+      alert('No se pudo eliminar. Este recurrente ya tiene gastos cargados en meses anteriores y no se puede borrar todavía.')
+      return
+    }
     setConfirmandoEliminar(null)
   }
 

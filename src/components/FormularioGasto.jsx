@@ -123,7 +123,12 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
     setGuardando(true)
     try {
       if (modoRecurrente) {
-        await eliminarRecurrente(gastoInicial.id)
+        const { error: errRecurrente } = await eliminarRecurrente(gastoInicial.id)
+        if (errRecurrente) {
+          setError('No se pudo eliminar: este recurrente ya tiene gastos cargados en meses anteriores.')
+          setGuardando(false)
+          return
+        }
       } else if (gastoInicial.cuotas_total) {
         const padreId = gastoInicial.gasto_padre_id || gastoInicial.id
         await supabase.from('gastos').delete().or(`id.eq.${padreId},gasto_padre_id.eq.${padreId}`)
