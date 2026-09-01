@@ -58,6 +58,9 @@ Stack: React + Vite + PWA + Supabase + Vercel.
   entre meses — decisión consciente, ver más abajo)
 - Confirmar un recurrente actualiza también el importe de la plantilla si se editó al
   confirmar, para que el mes siguiente sugiera el último valor usado
+- `gastos.recurrente_id -> gastos_recurrentes.id` es `ON DELETE SET NULL`: al borrar una
+  plantilla de recurrente, los gastos ya confirmados quedan intactos, solo pierden el
+  vínculo a la plantilla eliminada (fix aplicado 02/09/2026, antes bloqueaba el borrado)
 
 ## Pendiente
 
