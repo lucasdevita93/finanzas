@@ -1049,10 +1049,17 @@ body {
 }
 
 .grupo-fecha__titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   font-size: 0.8rem;
   color: #aaa;
   text-transform: capitalize;
   margin-bottom: 0.4rem;
+}
+
+.grupo-fecha__total {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Tarjeta de recurrentes pendientes */

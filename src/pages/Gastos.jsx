@@ -169,9 +169,14 @@ function Gastos() {
       ) : grupos.length === 0 ? (
         <p className="sin-gastos">No hay gastos en este mes</p>
       ) : (
-        grupos.map(({ fecha, gastos }) => (
+        grupos.map(({ fecha, gastos }) => {
+          const totalDia = gastos.reduce((sum, g) => sum + importeUsuario(g), 0)
+          return (
           <div key={fecha} className="grupo-fecha">
-            <p className="grupo-fecha__titulo">{formatearFecha(fecha)}</p>
+            <div className="grupo-fecha__titulo">
+              <span>{formatearFecha(fecha)}</span>
+              <span className="grupo-fecha__total">{formatearPesos(totalDia)}</span>
+            </div>
             <ul className="lista-gastos">
               {gastos.map((gasto) => {
                 const tieneCuotas = !!gasto.cuotas_total
@@ -206,7 +211,8 @@ function Gastos() {
               })}
             </ul>
           </div>
-        ))
+          )
+        })
       )}
 
       <button
