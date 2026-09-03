@@ -173,10 +173,9 @@ function Gastos() {
           const totalDia = gastos.reduce((sum, g) => sum + importeUsuario(g), 0)
           return (
           <div key={fecha} className="grupo-fecha">
-            <div className="grupo-fecha__titulo">
-              <span>{formatearFecha(fecha)}</span>
-              <span className="grupo-fecha__total">{formatearPesos(totalDia)}</span>
-            </div>
+            <p className="grupo-fecha__titulo">
+              {formatearFecha(fecha)} <span className="grupo-fecha__total">- {formatearPesos(totalDia)}</span>
+            </p>
             <ul className="lista-gastos">
               {gastos.map((gasto) => {
                 const tieneCuotas = !!gasto.cuotas_total
