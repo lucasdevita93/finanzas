@@ -34,13 +34,14 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 - `ProximasCuotas` — modal abierto desde Gastos (botón "Proyección"). Proyección de
   compromisos hacia adelante: navegación de mes (del actual hasta la última cuota).
   "Total comprometido" = recurrentes estimados + cuotas de tus medios de pago. Bloques:
-  1) "Gastos recurrentes" (estimado fijo mes a mes, leído de `recurrentes` del
-  AuthContext, misma "tu parte" que Configuración; se despliega al detalle);
-  2) desglose por medio de pago de las cuotas, con detalle por compra al tocar
-  (cuota X/N, importe/mes, mes de fin);
+  1) fila apretable "Gastos recurrentes" (estimado fijo mes a mes, leído de `recurrentes`
+  del AuthContext, misma "tu parte" que Configuración; se despliega al detalle);
+  2) fila apretable "Gastos en cuotas" (total del mes); adentro, desglose por medio de
+  pago y cada medio se abre al detalle por compra (cuota X/N, importe/mes, mes de fin);
   3) sección aparte "Compartidas pagadas por <nombre>" con la parte propia y su subtotal
-  (NO suma al total de arriba). Las cuotas se traen de Supabase (`gastos` con
-  `cuotas_total` y `fecha >=` mes actual); los recurrentes ya están en el contexto
+  (NO suma al total de arriba). Todo acordeón, sin sangrías. Las cuotas se traen de
+  Supabase (`gastos` con `cuotas_total` y `fecha >=` mes actual); los recurrentes ya
+  están en el contexto
 - `AuthContext` (`src/context/AuthContext.jsx`) — fuente de verdad del estado global:
   usuario, perfil, pareja, medios, categorías, recurrentes, notificaciones, vinculación
 
