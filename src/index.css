@@ -1312,6 +1312,11 @@ body {
   font-weight: 500;
 }
 
+.categoria-item__nota {
+  font-size: 0.72rem;
+  color: #999;
+}
+
 .categoria-item__barra-wrap {
   height: 4px;
   background: #f0f0f0;

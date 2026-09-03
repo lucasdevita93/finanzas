@@ -22,13 +22,14 @@ function mesFin(g) {
 }
 
 function ProximasCuotas({ onCerrar }) {
-  const { perfil, pareja, categorias } = useAuth()
+  const { perfil, pareja, categorias, recurrentes } = useAuth()
   const ahora = new Date()
   const [anio, setAnio] = useState(ahora.getFullYear())
   const [mes, setMes] = useState(ahora.getMonth()) // 0-index
   const [filas, setFilas] = useState([])
   const [cargando, setCargando] = useState(true)
   const [medioExpandido, setMedioExpandido] = useState(null)
+  const [recurrentesAbierto, setRecurrentesAbierto] = useState(false)
 
   useEffect(() => {
     if (!perfil) return
@@ -111,6 +112,15 @@ function ProximasCuotas({ onCerrar }) {
   const totalMes = propiasMes.reduce((sum, g) => sum + miParte(g), 0)
   const totalOtro = otroMes.reduce((sum, g) => sum + miParte(g), 0)
 
+  // Gastos recurrentes: estimado fijo mes a mes (se lee del AuthContext, mismo
+  // cálculo que Configuración). Es tu parte: mitad si el recurrente es compartido.
+  const parteRecurrente = (r) => (r.compartido ? r.importe / 2 : r.importe)
+  const totalRecurrentes = recurrentes.reduce((sum, r) => sum + parteRecurrente(r), 0)
+
+  // Total comprometido del mes = cuotas de tus medios + recurrentes estimados.
+  // La sección "compartidas pagadas por el otro" queda aparte, no suma acá.
+  const totalComprometido = totalMes + totalRecurrentes
+
   // Agrupar lo propio por medio de pago
   const porMedioMap = {}
   propiasMes.forEach(g => {
@@ -126,7 +136,7 @@ function ProximasCuotas({ onCerrar }) {
     }))
     .sort((a, b) => b.total - a.total)
 
-  const sinNada = porMedio.length === 0 && otroMes.length === 0
+  const sinNada = porMedio.length === 0 && otroMes.length === 0 && recurrentes.length === 0
 
   return (
     <>
@@ -149,14 +159,52 @@ function ProximasCuotas({ onCerrar }) {
         ) : (
           <>
             <div className="cuotas-total">
-              <span className="cuotas-total__label">Total en cuotas</span>
-              <span className="cuotas-total__monto">{formatearPesos(totalMes)}</span>
+              <span className="cuotas-total__label">Total comprometido</span>
+              <span className="cuotas-total__monto">{formatearPesos(totalComprometido)}</span>
             </div>
 
             {sinNada ? (
-              <p className="sin-gastos">No tenés cuotas comprometidas este mes</p>
+              <p className="sin-gastos">No tenés nada comprometido este mes</p>
             ) : (
               <>
+                {recurrentes.length > 0 && (
+                  <ul className="lista-categorias">
+                    <li>
+                      <div className="categoria-item" onClick={() => setRecurrentesAbierto(v => !v)}>
+                        <span className="categoria-item__icono">🔁</span>
+                        <div className="categoria-item__info">
+                          <span className="categoria-item__nombre">Gastos recurrentes</span>
+                          <span className="categoria-item__nota">estimado, igual todos los meses</span>
+                        </div>
+                        <div className="categoria-item__derecha">
+                          <span className="categoria-item__total">{formatearPesos(totalRecurrentes)}</span>
+                        </div>
+                      </div>
+                      {recurrentesAbierto && (
+                        <ul className="lista-gastos cuotas-detalle">
+                          {[...recurrentes]
+                            .sort((a, b) => parteRecurrente(b) - parteRecurrente(a))
+                            .map(r => (
+                              <li key={r.id} className="gasto-item">
+                                <span className="gasto-item__icono">{emojiCat(r.categoria_nombre)}</span>
+                                <div className="gasto-item__info">
+                                  <span className="gasto-item__desc">{r.descripcion || r.categoria_nombre}</span>
+                                  <span className="gasto-item__fecha">
+                                    {r.medio_de_pago_nombre || 'Sin medio'}
+                                    {r.compartido && ' · compartido'}
+                                  </span>
+                                </div>
+                                <div className="gasto-item__derecha">
+                                  <span className="gasto-item__importe">{formatearPesos(parteRecurrente(r))}</span>
+                                </div>
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                    </li>
+                  </ul>
+                )}
+
                 {porMedio.length > 0 && (
                   <>
                     <p className="cuotas-seccion">Por medio de pago</p>
