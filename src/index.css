@@ -914,6 +914,7 @@ body {
 
 .botones-analisis {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
@@ -982,6 +983,46 @@ body {
   font-size: 0.7rem;
   font-weight: 600;
   color: #333;
+}
+
+/* Modal de Cuotas */
+.mes-nav__flecha:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.cuotas-total {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.cuotas-total__label {
+  display: block;
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+.cuotas-total__monto {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.cuotas-seccion {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 1.1rem 0 0.4rem;
+}
+
+.cuotas-detalle {
+  background: #fafafa;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
 }
 
 .aviso-desvinculado {

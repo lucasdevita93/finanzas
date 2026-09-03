@@ -3,6 +3,7 @@ import FormularioGasto from '../components/FormularioGasto'
 import PorCategoria from '../components/PorCategoria'
 import PorMedioDePago from '../components/PorMedioDePago'
 import RecurrentesPendientes from '../components/RecurrentesPendientes'
+import ProximasCuotas from '../components/ProximasCuotas'
 import IconoFiltro from '../components/IconoFiltro'
 import { USUARIO_ACTUAL } from '../lib/datos'
 import { supabase } from '../lib/supabase'
@@ -58,6 +59,7 @@ function Gastos() {
   const [gastoEditando, setGastoEditando] = useState(null)
   const [porCategoriaAbierto, setPorCategoriaAbierto] = useState(false)
   const [porMedioDePagoAbierto, setPorMedioDePagoAbierto] = useState(false)
+  const [cuotasAbierto, setCuotasAbierto] = useState(false)
   const [recurrentesAbierto, setRecurrentesAbierto] = useState(false)
 
   useEffect(() => {
@@ -152,6 +154,12 @@ function Gastos() {
             <span className="boton-analisis__filtro"><IconoFiltro /></span>
           </span>
           <span className="boton-analisis__texto">Medio de pago</span>
+        </button>
+        <button className="boton-analisis" onClick={() => setCuotasAbierto(true)}>
+          <span className="boton-analisis__icono-wrap">
+            <span className="boton-analisis__icono">💳</span>
+          </span>
+          <span className="boton-analisis__texto">Cuotas</span>
         </button>
       </div>
 
@@ -249,6 +257,10 @@ function Gastos() {
           anioInicial={anio}
           onCerrar={() => setPorMedioDePagoAbierto(false)}
         />
+      )}
+
+      {cuotasAbierto && (
+        <ProximasCuotas onCerrar={() => setCuotasAbierto(false)} />
       )}
 
       {porCategoriaAbierto && (
