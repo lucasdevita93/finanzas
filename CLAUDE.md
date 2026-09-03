@@ -32,13 +32,15 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 - `RecurrentesPendientes` — confirmación mensual de gastos recurrentes; permite editar/
   eliminar la plantilla desde ahí mismo (reutiliza `FormularioGasto`)
 - `ProximasCuotas` — modal abierto desde Gastos (botón "Proyección"). Proyección de
-  cuotas hacia adelante: navegación de mes (del actual hasta la última cuota), total en
-  cuotas del mes (solo medios de pago propios), desglose por medio con detalle por compra
-  al tocar (cuota X/N, importe/mes, mes de fin), y sección aparte "Compartidas pagadas
-  por <nombre>" con la parte propia y su subtotal (no se suma al total de arriba). Trae
-  su propio dato de Supabase (`gastos` con `cuotas_total` y `fecha >=` mes actual).
-  Pendiente: sumar bloque de gastos recurrentes (leyendo `recurrentes` del AuthContext)
-  para un "Total comprometido" = recurrentes + cuotas
+  compromisos hacia adelante: navegación de mes (del actual hasta la última cuota).
+  "Total comprometido" = recurrentes estimados + cuotas de tus medios de pago. Bloques:
+  1) "Gastos recurrentes" (estimado fijo mes a mes, leído de `recurrentes` del
+  AuthContext, misma "tu parte" que Configuración; se despliega al detalle);
+  2) desglose por medio de pago de las cuotas, con detalle por compra al tocar
+  (cuota X/N, importe/mes, mes de fin);
+  3) sección aparte "Compartidas pagadas por <nombre>" con la parte propia y su subtotal
+  (NO suma al total de arriba). Las cuotas se traen de Supabase (`gastos` con
+  `cuotas_total` y `fecha >=` mes actual); los recurrentes ya están en el contexto
 - `AuthContext` (`src/context/AuthContext.jsx`) — fuente de verdad del estado global:
   usuario, perfil, pareja, medios, categorías, recurrentes, notificaciones, vinculación
 
