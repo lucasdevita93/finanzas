@@ -18,8 +18,8 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 ## Pantallas y componentes
 
 - **Gastos** (`src/pages/Gastos.jsx`) — navegación por mes, gastos propios + compartidos
-  del otro usuario mezclados, "Por categoría", "Por medio de pago", banner de recurrentes
-  pendientes (funciona para cualquier mes, no solo el actual), botón "+ Gasto"
+  del otro usuario mezclados, "Por categoría", "Por medio de pago", "Cuotas", banner de
+  recurrentes pendientes (funciona para cualquier mes, no solo el actual), botón "+ Gasto"
 - **Compartidos** (`src/pages/Compartidos.jsx`) — total compartido gastado, saldo neto
   con mascota Waldo Debe/Acreedor/Compartidos según estado, "Por categoría". No tiene
   botón de saldar/reclamar deuda (se sacó, no encajaba con el uso real mes a mes)
@@ -30,6 +30,12 @@ Stack: React + Vite + PWA + Supabase + Vercel.
   la confirmación mensual de recurrentes
 - `RecurrentesPendientes` — confirmación mensual de gastos recurrentes; permite editar/
   eliminar la plantilla desde ahí mismo (reutiliza `FormularioGasto`)
+- `ProximasCuotas` — modal abierto desde Gastos ("Cuotas"). Proyección de cuotas hacia
+  adelante: navegación de mes (del actual hasta la última cuota), total en cuotas del mes
+  (solo medios de pago propios), desglose por medio con detalle por compra al tocar
+  (cuota X/N, importe/mes, mes de fin), y sección aparte "Compartidas pagadas por
+  <nombre>" con la parte propia y su subtotal (no se suma al total de arriba). Trae su
+  propio dato de Supabase (`gastos` con `cuotas_total` y `fecha >=` mes actual)
 - `AuthContext` (`src/context/AuthContext.jsx`) — fuente de verdad del estado global:
   usuario, perfil, pareja, medios, categorías, recurrentes, notificaciones, vinculación
 
