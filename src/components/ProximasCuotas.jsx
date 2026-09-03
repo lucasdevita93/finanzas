@@ -134,7 +134,7 @@ function ProximasCuotas({ onCerrar }) {
       <div className="modal-panel">
 
         <div className="modal-header">
-          <h2>Cuotas</h2>
+          <h2>Proyección</h2>
           <button className="modal-cerrar" onClick={onCerrar}>✕</button>
         </div>
 

@@ -159,7 +159,7 @@ function Gastos() {
           <span className="boton-analisis__icono-wrap">
             <span className="boton-analisis__icono">💳</span>
           </span>
-          <span className="boton-analisis__texto">Cuotas</span>
+          <span className="boton-analisis__texto">Proyección</span>
         </button>
       </div>
 
