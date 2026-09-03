@@ -170,7 +170,6 @@ function ProximasCuotas({ onCerrar }) {
                             </div>
                             <div className="categoria-item__derecha">
                               <span className="categoria-item__total">{formatearPesos(total)}</span>
-                              <span className="categoria-item__pct">{items.length} cuota{items.length > 1 ? 's' : ''}</span>
                             </div>
                           </div>
                           {medioExpandido === medio && (
