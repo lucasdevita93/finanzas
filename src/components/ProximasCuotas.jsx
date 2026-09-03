@@ -30,6 +30,7 @@ function ProximasCuotas({ onCerrar }) {
   const [cargando, setCargando] = useState(true)
   const [medioExpandido, setMedioExpandido] = useState(null)
   const [recurrentesAbierto, setRecurrentesAbierto] = useState(false)
+  const [cuotasAbierto, setCuotasAbierto] = useState(false)
 
   useEffect(() => {
     if (!perfil) return
@@ -206,39 +207,52 @@ function ProximasCuotas({ onCerrar }) {
                 )}
 
                 {porMedio.length > 0 && (
-                  <>
-                    <p className="cuotas-seccion">Por medio de pago</p>
-                    <ul className="lista-categorias">
-                      {porMedio.map(({ medio, items, total }) => (
-                        <li key={medio}>
-                          <div className="categoria-item" onClick={() => setMedioExpandido(m => m === medio ? null : medio)}>
-                            <span className="categoria-item__icono">💳</span>
-                            <div className="categoria-item__info">
-                              <span className="categoria-item__nombre">{medio}</span>
-                            </div>
-                            <div className="categoria-item__derecha">
-                              <span className="categoria-item__total">{formatearPesos(total)}</span>
-                            </div>
-                          </div>
-                          {medioExpandido === medio && (
-                            <ul className="lista-gastos cuotas-detalle">
-                              {items.map(g => (
-                                <li key={g.id} className="gasto-item">
-                                  <span className="gasto-item__icono">{emojiCat(g.categoria_nombre)}</span>
-                                  <div className="gasto-item__info">
-                                    <span className="gasto-item__desc">{g.descripcion || g.categoria_nombre}</span>
-                                    <span className="gasto-item__fecha">
-                                      Cuota {g.cuota_numero}/{g.cuotas_total} · {formatearPesos(miParte(g))}/mes · termina {mesFin(g)}
-                                    </span>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
+                  <ul className="lista-categorias">
+                    <li>
+                      <div className="categoria-item" onClick={() => setCuotasAbierto(v => !v)}>
+                        <span className="categoria-item__icono">🧾</span>
+                        <div className="categoria-item__info">
+                          <span className="categoria-item__nombre">Gastos en cuotas</span>
+                        </div>
+                        <div className="categoria-item__derecha">
+                          <span className="categoria-item__total">{formatearPesos(totalMes)}</span>
+                        </div>
+                      </div>
+
+                      {cuotasAbierto && (
+                        <ul className="lista-categorias">
+                          {porMedio.map(({ medio, items, total }) => (
+                            <li key={medio}>
+                              <div className="categoria-item" onClick={() => setMedioExpandido(m => m === medio ? null : medio)}>
+                                <span className="categoria-item__icono">💳</span>
+                                <div className="categoria-item__info">
+                                  <span className="categoria-item__nombre">{medio}</span>
+                                </div>
+                                <div className="categoria-item__derecha">
+                                  <span className="categoria-item__total">{formatearPesos(total)}</span>
+                                </div>
+                              </div>
+                              {medioExpandido === medio && (
+                                <ul className="lista-gastos cuotas-detalle">
+                                  {items.map(g => (
+                                    <li key={g.id} className="gasto-item">
+                                      <span className="gasto-item__icono">{emojiCat(g.categoria_nombre)}</span>
+                                      <div className="gasto-item__info">
+                                        <span className="gasto-item__desc">{g.descripcion || g.categoria_nombre}</span>
+                                        <span className="gasto-item__fecha">
+                                          Cuota {g.cuota_numero}/{g.cuotas_total} · {formatearPesos(miParte(g))}/mes · termina {mesFin(g)}
+                                        </span>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  </ul>
                 )}
 
                 {otroMes.length > 0 && (
