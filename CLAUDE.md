@@ -62,6 +62,12 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 
 ## Notas de arquitectura
 
+- `gastos.pagador_id` puede diferir de `gastos.user_id`: la fila la crea/edita siempre su
+  dueño (`user_id`, así no hace falta tocar RLS), pero al cargar un gasto compartido se
+  puede elegir "¿Quién pagó?" y adjudicárselo al otro usuario. El saldo de Compartidos y
+  las etiquetas "Pagó X" se calculan por `pagador_id`; poder editar/borrar depende de
+  `user_id` (ser dueño de la fila)
+
 - Nombres de categoría/medio de pago se guardan como texto (`categoria_nombre`,
   `medio_de_pago_nombre`), no como FK — renombrar en Configuración actualiza en cascada
   los `gastos` y `gastos_recurrentes` existentes (`actualizarMedio`/`actualizarCategoria`
