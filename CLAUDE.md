@@ -41,9 +41,12 @@ Stack: React + Vite + PWA + Supabase + Vercel.
   2) fila apretable "Gastos en cuotas" (total del mes); adentro, desglose por medio de
   pago y cada medio se abre al detalle por compra (cuota X/N, importe/mes, mes de fin);
   3) sección aparte "Compartidas pagadas por <nombre>" con la parte propia y su subtotal
-  (NO suma al total de arriba). Todo acordeón, sin sangrías. Las cuotas se traen de
-  Supabase (`gastos` con `cuotas_total` y `fecha >=` mes actual); los recurrentes ya
-  están en el contexto
+  (NO suma al total de arriba). Trae cuotas O recurrentes ya confirmados de la pareja
+  (no cualquier gasto suelto) — un recurrente compartido que el otro usuario confirma
+  ese mes aparece acá, aunque vos no tengas la plantilla (es privada por usuario). Todo
+  acordeón, sin sangrías. Las cuotas propias se traen de Supabase (`gastos` con
+  `cuotas_total` y `fecha >=` mes actual); los recurrentes propios ya están en el
+  contexto
 - `AuthContext` (`src/context/AuthContext.jsx`) — fuente de verdad del estado global:
   usuario, perfil, pareja, medios, categorías, recurrentes, notificaciones, vinculación
 
