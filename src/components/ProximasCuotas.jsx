@@ -7,10 +7,10 @@ function formatearPesos(monto) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(monto)
 }
 
-// Lo que le toca al usuario actual de una cuota de este gasto
+// Lo que le toca al usuario actual de este gasto (cuota si tiene, o el total)
 function miParte(g) {
-  const cuota = g.importe / g.cuotas_total
-  return g.compartido ? cuota / 2 : cuota
+  const base = g.cuotas_total ? g.importe / g.cuotas_total : g.importe
+  return g.compartido ? base / 2 : base
 }
 
 // Mes en que se paga la última cuota de este gasto (ej: "jun 2027")
@@ -47,13 +47,15 @@ function ProximasCuotas({ onCerrar }) {
         .not('cuotas_total', 'is', null)
         .gte('fecha', desde)
 
+      // Del otro usuario traemos cuotas Y recurrentes ya confirmados (no gastos
+      // sueltos): son los compromisos, no cualquier compra compartida del mes.
       const delOtro = pareja?.id
         ? supabase
             .from('gastos')
             .select('*')
             .eq('user_id', pareja.id)
             .eq('compartido', true)
-            .not('cuotas_total', 'is', null)
+            .or('cuotas_total.not.is.null,recurrente_id.not.is.null')
             .gte('fecha', desde)
         : Promise.resolve({ data: [] })
 
@@ -265,7 +267,11 @@ function ProximasCuotas({ onCerrar }) {
                           <div className="gasto-item__info">
                             <span className="gasto-item__desc">{g.descripcion || g.categoria_nombre}</span>
                             <span className="gasto-item__fecha">
-                              Cuota {g.cuota_numero}/{g.cuotas_total} · termina {mesFin(g)}
+                              {g.cuotas_total
+                                ? `Cuota ${g.cuota_numero}/${g.cuotas_total} · termina ${mesFin(g)}`
+                                : g.recurrente_id
+                                  ? 'Recurrente'
+                                  : ''}
                             </span>
                           </div>
                           <div className="gasto-item__derecha">
