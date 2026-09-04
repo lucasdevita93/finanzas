@@ -129,10 +129,19 @@ function Compartidos() {
       dePareja = data ?? []
     }
 
+    // "propio" = la fila la cargaste vos (podés editarla/borrarla).
+    // "esMio" = quién la pagó en realidad (define el saldo) — puede ser
+    // distinto de "propio" si cargaste un gasto y se lo adjudicaste al otro.
     const normalizados = [
-      ...(mios ?? []).map(g => ({ ...g, esMio: true, nombrePagador: perfil.nombre })),
-      ...dePareja.map(g => ({ ...g, esMio: false, nombrePagador: pareja?.nombre ?? 'Tu pareja' })),
-    ].sort((a, b) => b.fecha.localeCompare(a.fecha))
+      ...(mios ?? []).map(g => ({ ...g, propio: true })),
+      ...dePareja.map(g => ({ ...g, propio: false })),
+    ]
+      .map(g => ({
+        ...g,
+        esMio: g.pagador_id === perfil.id,
+        nombrePagador: g.pagador_id === perfil.id ? perfil.nombre : (pareja?.nombre ?? 'Tu pareja'),
+      }))
+      .sort((a, b) => b.fecha.localeCompare(a.fecha))
 
     setGastos(normalizados)
     setCargando(false)
@@ -228,8 +237,8 @@ function Compartidos() {
                 <li
                   key={gasto.id}
                   className="gasto-item"
-                  onClick={gasto.esMio ? () => { setGastoEditando(gasto); setFormularioAbierto(true) } : undefined}
-                  style={gasto.esMio ? { cursor: 'pointer' } : undefined}
+                  onClick={gasto.propio ? () => { setGastoEditando(gasto); setFormularioAbierto(true) } : undefined}
+                  style={gasto.propio ? { cursor: 'pointer' } : undefined}
                 >
                   <span className="gasto-item__icono">{cat?.emoji ?? '📦'}</span>
                   <div className="gasto-item__info">

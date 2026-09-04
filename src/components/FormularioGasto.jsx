@@ -54,6 +54,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
     compartido: gastoInicial.compartido,
     recurrente: gastoInicial.recurrente || false,
     responsable: gastoInicial.responsable || '',
+    pagado_por: gastoInicial.pagador_id || perfil?.id || '',
   } : {
     fecha: hoy(),
     importe: '',
@@ -67,6 +68,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
     compartido: compartidoPorDefault,
     recurrente: false,
     responsable: '',
+    pagado_por: perfil?.id || '',
   })
 
   const categoriasVisibles = form.compartido
@@ -137,7 +139,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
       }
       onGuardado?.()
       onCerrar()
-    } catch (err) {
+    } catch {
       setError('No se pudo eliminar el gasto.')
     } finally {
       setGuardando(false)
@@ -187,7 +189,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
 
       const gastoBase = {
         user_id: perfil.id,
-        pagador_id: perfil.id,
+        pagador_id: form.compartido ? (form.pagado_por || perfil.id) : perfil.id,
         importe: importeEnPesos,
         moneda: form.moneda,
         cotizacion: esUSD ? parseFloat(form.cotizacion) : null,
@@ -445,6 +447,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
                   }
                   setAvisoSinPareja(false)
                   actualizar('compartido', e.target.checked)
+                  if (!e.target.checked) actualizar('pagado_por', perfil?.id || '')
                 }}
               />
               Gasto compartido
@@ -457,6 +460,28 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
 
           {form.compartido && pareja && (
             <p className="form-hint">Este gasto se divide al 50% con {pareja.nombre}. Ambos lo verán en la pantalla de Compartidos. Además, influye en tu espacio personal la parte que te corresponde.</p>
+          )}
+
+          {form.compartido && pareja && !modoRecurrente && (
+            <div className="campo">
+              <label>¿Quién pagó?</label>
+              <div className="chips">
+                <button
+                  type="button"
+                  className={`chip ${form.pagado_por === perfil?.id ? 'chip--activo' : ''}`}
+                  onClick={() => actualizar('pagado_por', perfil?.id || '')}
+                >
+                  Yo
+                </button>
+                <button
+                  type="button"
+                  className={`chip ${form.pagado_por === pareja.id ? 'chip--activo' : ''}`}
+                  onClick={() => actualizar('pagado_por', pareja.id)}
+                >
+                  {pareja.nombre}
+                </button>
+              </div>
+            </div>
           )}
 
           {!modoRecurrente && <div className="campo campo--toggle">
@@ -510,13 +535,13 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
             {guardando ? 'Guardando...' : gastoInicial ? 'Guardar cambios' : 'Guardar gasto'}
           </button>
 
-          {gastoInicial && gastoInicial.pagador_id && gastoInicial.pagador_id !== perfil?.id && (
+          {gastoInicial && gastoInicial.user_id && gastoInicial.user_id !== perfil?.id && (
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#aaa', marginTop: '0.5rem' }}>
-              No es posible eliminar un gasto que no pagaste.
+              No es posible eliminar un gasto que no cargaste vos.
             </p>
           )}
 
-          {gastoInicial && (!gastoInicial.pagador_id || gastoInicial.pagador_id === perfil?.id) && (
+          {gastoInicial && (!gastoInicial.user_id || gastoInicial.user_id === perfil?.id) && (
             confirmandoEliminar ? (
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
