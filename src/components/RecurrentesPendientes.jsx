@@ -19,7 +19,7 @@ function fechaParaConfirmar(anio, mes) {
   return `${anio}-${String(mes + 1).padStart(2, '0')}-01`
 }
 
-function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, onEditar, emoji }) {
+function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onConfirmar, onEditar, emoji, perfil, pareja, pagadorId, onCambiarPagador }) {
   return (
     <li className={`recurrente-item ${guardado ? 'recurrente-item--confirmado' : ''}`}>
       <div className="recurrente-item__header" onClick={onEditar} style={{ cursor: 'pointer' }}>
@@ -33,6 +33,25 @@ function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onCo
         </div>
         {guardado && <span className="recurrente-item__ok">✓</span>}
       </div>
+
+      {r.compartido && pareja && !guardado && (
+        <div className="chips" style={{ marginBottom: '0.5rem' }}>
+          <button
+            type="button"
+            className={`chip ${pagadorId === perfil.id ? 'chip--activo' : ''}`}
+            onClick={() => onCambiarPagador(perfil.id)}
+          >
+            Pagué yo
+          </button>
+          <button
+            type="button"
+            className={`chip ${pagadorId === pareja.id ? 'chip--activo' : ''}`}
+            onClick={() => onCambiarPagador(pareja.id)}
+          >
+            Pagó {pareja.nombre}
+          </button>
+        </div>
+      )}
 
       {!guardado ? (
         <div className="recurrente-item__acciones">
@@ -57,9 +76,12 @@ function ItemConfirmar({ r, importe, onCambiarImporte, guardado, guardando, onCo
 }
 
 function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, onConfirmado }) {
-  const { perfil, categorias, actualizarRecurrente } = useAuth()
+  const { perfil, pareja, categorias, actualizarRecurrente } = useAuth()
   const [importes, setImportes] = useState(
     Object.fromEntries(recurrentes.map(r => [r.id, r.importe]))
+  )
+  const [pagadores, setPagadores] = useState(
+    Object.fromEntries(recurrentes.map(r => [r.id, perfil?.id]))
   )
   const [guardados, setGuardados] = useState({})
   const [guardandoId, setGuardandoId] = useState(null)
@@ -71,7 +93,7 @@ function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, on
     try {
       const { error } = await supabase.from('gastos').insert({
         user_id: perfil.id,
-        pagador_id: perfil.id,
+        pagador_id: pagadores[r.id] ?? perfil.id,
         importe: importes[r.id],
         moneda: 'ARS',
         fecha: fechaParaConfirmar(anio, mes),
@@ -136,6 +158,10 @@ function RecurrentesPendientes({ recurrentes, anio, mes, nombreMes, onCerrar, on
                 guardando={guardandoId === r.id}
                 onConfirmar={() => confirmarUno(r)}
                 onEditar={() => setEditando(r)}
+                perfil={perfil}
+                pareja={pareja}
+                pagadorId={pagadores[r.id]}
+                onCambiarPagador={val => setPagadores(prev => ({ ...prev, [r.id]: val }))}
               />
             )
           })}
