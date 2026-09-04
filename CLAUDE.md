@@ -30,7 +30,9 @@ Stack: React + Vite + PWA + Supabase + Vercel.
   recurrentes (`modoRecurrente`); el mismo componente se abre desde Configuración y desde
   la confirmación mensual de recurrentes
 - `RecurrentesPendientes` — confirmación mensual de gastos recurrentes; permite editar/
-  eliminar la plantilla desde ahí mismo (reutiliza `FormularioGasto`)
+  eliminar la plantilla desde ahí mismo (reutiliza `FormularioGasto`). Si el recurrente es
+  compartido, antes de confirmar se elige "Pagué yo" / "Pagó <nombre>" (sin valor por
+  defecto, se elige cada mes)
 - `ProximasCuotas` — modal abierto desde Gastos (botón "Proyección"). Proyección de
   compromisos hacia adelante: navegación de mes (del actual hasta la última cuota).
   "Total comprometido" = recurrentes estimados + cuotas de tus medios de pago. Bloques:
