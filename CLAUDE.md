@@ -37,7 +37,9 @@ Stack: React + Vite + PWA + Supabase + Vercel.
   compromisos hacia adelante: navegación de mes (del actual hasta la última cuota).
   "Total comprometido" = recurrentes estimados + cuotas de tus medios de pago. Bloques:
   1) fila apretable "Gastos recurrentes" (estimado fijo mes a mes, leído de `recurrentes`
-  del AuthContext, misma "tu parte" que Configuración; se despliega al detalle);
+  del AuthContext, misma "tu parte" que Configuración); adentro, desglose por categoría
+  y cada categoría se abre al detalle de cada gasto (mismo patrón que "Gastos en
+  cuotas");
   2) fila apretable "Gastos en cuotas" (total del mes); adentro, desglose por medio de
   pago y cada medio se abre al detalle por compra (cuota X/N, importe/mes, mes de fin);
   3) sección aparte "Compartidas pagadas por <nombre>" con la parte propia y su subtotal
