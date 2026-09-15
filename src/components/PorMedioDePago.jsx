@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MEDIOS_DE_PAGO, USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
+import { cargarGastosDelMes } from '../lib/gastos'
 import { useAuth } from '../context/AuthContext'
 
 const LABEL_OTRO = `Pagó ${OTRO_USUARIO}`
@@ -114,10 +115,30 @@ function DetalleMedioDePago({ medio, gastos, onVolver }) {
   )
 }
 
-function PorMedioDePago({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
+function PorMedioDePago({ mesInicial, anioInicial, onCerrar }) {
+  const { perfil, pareja, categorias } = useAuth()
   const [anio, setAnio] = useState(anioInicial)
   const [mes, setMes] = useState(mesInicial)
+  const [gastosMes, setGastosMes] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [medioSeleccionado, setMedioSeleccionado] = useState(null)
+
+  useEffect(() => {
+    if (!perfil) return
+    let vigente = true
+
+    async function cargar() {
+      setCargando(true)
+      const datos = await cargarGastosDelMes({ perfil, pareja, categorias, anio, mes })
+      if (!vigente) return
+      setGastosMes(datos)
+      setCargando(false)
+    }
+
+    cargar()
+    return () => { vigente = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perfil?.id, pareja?.id, anio, mes])
 
   function mesAnterior() {
     if (mes === 0) { setMes(11); setAnio(a => a - 1) }
@@ -132,11 +153,6 @@ function PorMedioDePago({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
   }
 
   const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
-
-  const gastosMes = todosLosGastos.filter(g => {
-    const [a, m] = g.fecha.split('-').map(Number)
-    return a === anio && m === mes + 1
-  })
 
   // Solo los gastos que pagó el usuario actual
   const gastosLucas = gastosMes.filter(g => g.pagador === USUARIO_ACTUAL)
@@ -186,6 +202,8 @@ function PorMedioDePago({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
             gastos={gastosMes}
             onVolver={() => setMedioSeleccionado(null)}
           />
+        ) : cargando ? (
+          <p className="sin-gastos">Cargando...</p>
         ) : porMedio.length === 0 ? (
           <p className="sin-gastos">No hay gastos en este mes</p>
         ) : (

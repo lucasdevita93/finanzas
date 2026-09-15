@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { USUARIO_ACTUAL, OTRO_USUARIO } from '../lib/datos'
+import { cargarGastosDelMes } from '../lib/gastos'
 import { useAuth } from '../context/AuthContext'
 
 function aCargo(gasto) {
@@ -24,11 +25,30 @@ function formatearFecha(fechaStr) {
   return new Date(anio, mes - 1, dia).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
 }
 
-function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
-  const { categorias } = useAuth()
+function PorCategoria({ mesInicial, anioInicial, onCerrar }) {
+  const { perfil, pareja, categorias } = useAuth()
   const [anio, setAnio] = useState(anioInicial)
   const [mes, setMes] = useState(mesInicial)
+  const [gastosMes, setGastosMes] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [categoriaExpandida, setCategoriaExpandida] = useState(null)
+
+  useEffect(() => {
+    if (!perfil) return
+    let vigente = true
+
+    async function cargar() {
+      setCargando(true)
+      const datos = await cargarGastosDelMes({ perfil, pareja, categorias, anio, mes })
+      if (!vigente) return
+      setGastosMes(datos)
+      setCargando(false)
+    }
+
+    cargar()
+    return () => { vigente = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perfil?.id, pareja?.id, anio, mes])
 
   function emojiDe(nombre) {
     return categorias.find(c => c.nombre === nombre)?.emoji ?? '📦'
@@ -47,11 +67,6 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
   }
 
   const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
-
-  const gastosMes = todosLosGastos.filter(g => {
-    const [a, m] = g.fecha.split('-').map(Number)
-    return a === anio && m === mes + 1
-  })
 
   const porCategoriaMap = {}
   gastosMes.forEach(g => {
@@ -85,7 +100,9 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
           <button className="mes-nav__flecha" onClick={mesSiguiente}>›</button>
         </div>
 
-        {porCategoria.length === 0 ? (
+        {cargando ? (
+          <p className="sin-gastos">Cargando...</p>
+        ) : porCategoria.length === 0 ? (
           <p className="sin-gastos">No hay gastos en este mes</p>
         ) : (
           <ul className="lista-categorias">

@@ -6,7 +6,7 @@ import RecurrentesPendientes from '../components/RecurrentesPendientes'
 import ProximasCuotas from '../components/ProximasCuotas'
 import IconoFiltro from '../components/IconoFiltro'
 import { USUARIO_ACTUAL } from '../lib/datos'
-import { supabase } from '../lib/supabase'
+import { cargarGastosDelMes } from '../lib/gastos'
 import { useAuth } from '../context/AuthContext'
 
 function formatearPesos(monto) {
@@ -28,19 +28,6 @@ function formatearFecha(fechaStr) {
   const [anio, mes, dia] = fechaStr.split('-')
   const fecha = new Date(anio, mes - 1, dia)
   return fecha.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
-}
-
-function normalizarGasto(g, perfil, categorias, pareja) {
-  const cat = categorias.find(c => c.nombre === g.categoria_nombre)
-  const esMio = g.pagador_id === perfil?.id
-  return {
-    ...g,
-    categoria: g.categoria_nombre,
-    medio_de_pago: g.medio_de_pago_nombre,
-    icono: cat?.emoji ?? '📦',
-    pagador: esMio ? USUARIO_ACTUAL : (pareja?.nombre ?? 'otro'),
-    cuota_actual: g.cuota_numero,
-  }
 }
 
 function importeUsuario(g) {
@@ -69,34 +56,8 @@ function Gastos() {
 
   async function cargarGastos() {
     setCargando(true)
-    const desde = `${anio}-${String(mes + 1).padStart(2, '0')}-01`
-    const hasta = mes === 11
-      ? `${anio + 1}-01-01`
-      : `${anio}-${String(mes + 2).padStart(2, '0')}-01`
-
-    const { data: propios } = await supabase
-      .from('gastos')
-      .select('*')
-      .eq('user_id', perfil.id)
-      .gte('fecha', desde)
-      .lt('fecha', hasta)
-
-    let dePareja = []
-    if (pareja?.id) {
-      const { data } = await supabase
-        .from('gastos')
-        .select('*')
-        .eq('user_id', pareja.id)
-        .eq('compartido', true)
-        .gte('fecha', desde)
-        .lt('fecha', hasta)
-      dePareja = data ?? []
-    }
-
-    const todos = [...(propios ?? []), ...dePareja]
-      .sort((a, b) => b.fecha.localeCompare(a.fecha))
-
-    setGastos(todos.map(g => normalizarGasto(g, perfil, categorias, pareja)))
+    const nuevosGastos = await cargarGastosDelMes({ perfil, pareja, categorias, anio, mes })
+    setGastos(nuevosGastos)
     setCargando(false)
   }
 
@@ -252,7 +213,6 @@ function Gastos() {
 
       {porMedioDePagoAbierto && (
         <PorMedioDePago
-          todosLosGastos={gastos}
           mesInicial={mes}
           anioInicial={anio}
           onCerrar={() => setPorMedioDePagoAbierto(false)}
@@ -265,7 +225,6 @@ function Gastos() {
 
       {porCategoriaAbierto && (
         <PorCategoria
-          todosLosGastos={gastos}
           mesInicial={mes}
           anioInicial={anio}
           onCerrar={() => setPorCategoriaAbierto(false)}
