@@ -157,7 +157,7 @@ function Gastos() {
         </button>
         <button className="boton-analisis" onClick={() => setCuotasAbierto(true)}>
           <span className="boton-analisis__icono-wrap">
-            <span className="boton-analisis__icono">💳</span>
+            <img src="/Waldo Proyeccion.png" alt="" className="boton-analisis__mascota" />
           </span>
           <span className="boton-analisis__texto">Proyección</span>
         </button>
