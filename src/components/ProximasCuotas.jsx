@@ -30,6 +30,7 @@ function ProximasCuotas({ onCerrar }) {
   const [cargando, setCargando] = useState(true)
   const [medioExpandido, setMedioExpandido] = useState(null)
   const [recurrentesAbierto, setRecurrentesAbierto] = useState(false)
+  const [categoriaRecurrenteExpandida, setCategoriaRecurrenteExpandida] = useState(null)
   const [cuotasAbierto, setCuotasAbierto] = useState(false)
 
   useEffect(() => {
@@ -120,6 +121,21 @@ function ProximasCuotas({ onCerrar }) {
   const parteRecurrente = (r) => (r.compartido ? r.importe / 2 : r.importe)
   const totalRecurrentes = recurrentes.reduce((sum, r) => sum + parteRecurrente(r), 0)
 
+  // Agrupar recurrentes por categoría
+  const porCategoriaRecurrenteMap = {}
+  recurrentes.forEach(r => {
+    const clave = r.categoria_nombre || 'Sin categoría'
+    if (!porCategoriaRecurrenteMap[clave]) porCategoriaRecurrenteMap[clave] = []
+    porCategoriaRecurrenteMap[clave].push(r)
+  })
+  const porCategoriaRecurrente = Object.entries(porCategoriaRecurrenteMap)
+    .map(([categoria, items]) => ({
+      categoria,
+      items,
+      total: items.reduce((sum, r) => sum + parteRecurrente(r), 0),
+    }))
+    .sort((a, b) => b.total - a.total)
+
   // Total comprometido del mes = cuotas de tus medios + recurrentes estimados.
   // La sección "compartidas pagadas por el otro" queda aparte, no suma acá.
   const totalComprometido = totalMes + totalRecurrentes
@@ -184,24 +200,41 @@ function ProximasCuotas({ onCerrar }) {
                         </div>
                       </div>
                       {recurrentesAbierto && (
-                        <ul className="lista-gastos cuotas-detalle">
-                          {[...recurrentes]
-                            .sort((a, b) => parteRecurrente(b) - parteRecurrente(a))
-                            .map(r => (
-                              <li key={r.id} className="gasto-item">
-                                <span className="gasto-item__icono">{emojiCat(r.categoria_nombre)}</span>
-                                <div className="gasto-item__info">
-                                  <span className="gasto-item__desc">{r.descripcion || r.categoria_nombre}</span>
-                                  <span className="gasto-item__fecha">
-                                    {r.medio_de_pago_nombre || 'Sin medio'}
-                                    {r.compartido && ' · compartido'}
-                                  </span>
+                        <ul className="lista-categorias">
+                          {porCategoriaRecurrente.map(({ categoria, items, total }) => (
+                            <li key={categoria}>
+                              <div className="categoria-item" onClick={() => setCategoriaRecurrenteExpandida(c => c === categoria ? null : categoria)}>
+                                <span className="categoria-item__icono">{emojiCat(categoria)}</span>
+                                <div className="categoria-item__info">
+                                  <span className="categoria-item__nombre">{categoria}</span>
                                 </div>
-                                <div className="gasto-item__derecha">
-                                  <span className="gasto-item__importe">{formatearPesos(parteRecurrente(r))}</span>
+                                <div className="categoria-item__derecha">
+                                  <span className="categoria-item__total">{formatearPesos(total)}</span>
                                 </div>
-                              </li>
-                            ))}
+                              </div>
+                              {categoriaRecurrenteExpandida === categoria && (
+                                <ul className="lista-gastos cuotas-detalle">
+                                  {[...items]
+                                    .sort((a, b) => parteRecurrente(b) - parteRecurrente(a))
+                                    .map(r => (
+                                      <li key={r.id} className="gasto-item">
+                                        <span className="gasto-item__icono">{emojiCat(r.categoria_nombre)}</span>
+                                        <div className="gasto-item__info">
+                                          <span className="gasto-item__desc">{r.descripcion || r.categoria_nombre}</span>
+                                          <span className="gasto-item__fecha">
+                                            {r.medio_de_pago_nombre || 'Sin medio'}
+                                            {r.compartido && ' · compartido'}
+                                          </span>
+                                        </div>
+                                        <div className="gasto-item__derecha">
+                                          <span className="gasto-item__importe">{formatearPesos(parteRecurrente(r))}</span>
+                                        </div>
+                                      </li>
+                                    ))}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
                         </ul>
                       )}
                     </li>
