@@ -67,6 +67,12 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 
 ## Notas de arquitectura
 
+- `gastos_recurrentes` no guarda `moneda`/`cotizacion`/`monto_original` (solo `importe`
+  en pesos): un recurrente en USD se convierte **una sola vez**, al guardar, con la
+  cotización cargada en ese momento. Si el dólar se mueve después, hay que editar el
+  recurrente a mano para actualizarlo — no se recalcula solo (fix aplicado 15/09/2026:
+  el formulario dedicado a recurrentes guardaba el monto en USD crudo, sin convertir)
+
 - `gastos.pagador_id` puede diferir de `gastos.user_id`: la fila la crea/edita siempre su
   dueño (`user_id`, así no hace falta tocar RLS), pero al cargar un gasto compartido se
   puede elegir "¿Quién pagó?" y adjudicárselo al otro usuario. El saldo de Compartidos y
