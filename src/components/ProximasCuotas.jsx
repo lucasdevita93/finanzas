@@ -220,7 +220,6 @@ function ProximasCuotas({ onCerrar }) {
                                     .sort((a, b) => parteRecurrente(b) - parteRecurrente(a))
                                     .map(r => (
                                       <li key={r.id} className="gasto-item">
-                                        <span className="gasto-item__icono">{emojiCat(r.categoria_nombre)}</span>
                                         <div className="gasto-item__info">
                                           <span className="gasto-item__desc">{r.descripcion || r.categoria_nombre}</span>
                                           <span className="gasto-item__fecha">
