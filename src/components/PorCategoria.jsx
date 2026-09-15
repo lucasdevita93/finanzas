@@ -24,47 +24,11 @@ function formatearFecha(fechaStr) {
   return new Date(anio, mes - 1, dia).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
 }
 
-function DetalleCategoria({ categoria, gastos, onVolver, emoji }) {
-  const gastosCategoria = gastos.filter(g => g.categoria === categoria)
-  const totalCategoria = gastosCategoria.reduce((sum, g) => sum + aCargo(g), 0)
-
-  return (
-    <div className="panel-interior">
-      <div className="panel-interior__header">
-        <button className="boton-volver" onClick={onVolver}>← Volver</button>
-        <h3>{emoji} {categoria}</h3>
-      </div>
-      <p className="detalle-total">Total: {formatearPesos(totalCategoria)}</p>
-      <ul className="lista-gastos">
-        {gastosCategoria.map((gasto) => (
-          <li key={gasto.id} className="gasto-item">
-            <span className="gasto-item__icono">{gasto.icono}</span>
-            <div className="gasto-item__info">
-              <span className="gasto-item__desc">{gasto.descripcion}</span>
-              <span className="gasto-item__fecha">
-                {formatearFecha(gasto.fecha)} · {gasto.compartido && gasto.pagador !== USUARIO_ACTUAL ? `Pagó ${OTRO_USUARIO}` : gasto.medio_de_pago}
-                {subtituloGasto(gasto) && ` · ${subtituloGasto(gasto)}`}
-              </span>
-            </div>
-            <div className="gasto-item__derecha">
-              <span className="gasto-item__importe">{formatearPesos(aCargo(gasto))}</span>
-              {gasto.compartido && <span className="gasto-item__badge">compartido</span>}
-            </div>
-          </li>
-        ))}
-        {gastosCategoria.length === 0 && (
-          <p className="sin-gastos">No hay gastos en este mes</p>
-        )}
-      </ul>
-    </div>
-  )
-}
-
 function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
   const { categorias } = useAuth()
   const [anio, setAnio] = useState(anioInicial)
   const [mes, setMes] = useState(mesInicial)
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null)
+  const [categoriaExpandida, setCategoriaExpandida] = useState(null)
 
   function emojiDe(nombre) {
     return categorias.find(c => c.nombre === nombre)?.emoji ?? '📦'
@@ -73,13 +37,13 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
   function mesAnterior() {
     if (mes === 0) { setMes(11); setAnio(a => a - 1) }
     else setMes(m => m - 1)
-    setCategoriaSeleccionada(null)
+    setCategoriaExpandida(null)
   }
 
   function mesSiguiente() {
     if (mes === 11) { setMes(0); setAnio(a => a + 1) }
     else setMes(m => m + 1)
-    setCategoriaSeleccionada(null)
+    setCategoriaExpandida(null)
   }
 
   const nombreMes = `${new Date(anio, mes).toLocaleString('es-AR', { month: 'long' })} ${anio}`
@@ -89,17 +53,20 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
     return a === anio && m === mes + 1
   })
 
-  const totalGeneral = gastosMes.reduce((sum, g) => sum + aCargo(g), 0)
-
-  const porCategoria = Object.entries(
-    gastosMes.reduce((acc, g) => {
-      if (!acc[g.categoria]) acc[g.categoria] = 0
-      acc[g.categoria] += aCargo(g)
-      return acc
-    }, {})
-  )
-    .map(([categoria, total]) => ({ categoria, total }))
+  const porCategoriaMap = {}
+  gastosMes.forEach(g => {
+    if (!porCategoriaMap[g.categoria]) porCategoriaMap[g.categoria] = []
+    porCategoriaMap[g.categoria].push(g)
+  })
+  const porCategoria = Object.entries(porCategoriaMap)
+    .map(([categoria, items]) => ({
+      categoria,
+      items,
+      total: items.reduce((sum, g) => sum + aCargo(g), 0),
+    }))
     .sort((a, b) => b.total - a.total)
+
+  const totalGeneral = porCategoria.reduce((sum, c) => sum + c.total, 0)
 
   return (
     <>
@@ -118,32 +85,46 @@ function PorCategoria({ todosLosGastos, mesInicial, anioInicial, onCerrar }) {
           <button className="mes-nav__flecha" onClick={mesSiguiente}>›</button>
         </div>
 
-        {categoriaSeleccionada ? (
-          <DetalleCategoria
-            categoria={categoriaSeleccionada}
-            gastos={gastosMes}
-            onVolver={() => setCategoriaSeleccionada(null)}
-            emoji={emojiDe(categoriaSeleccionada)}
-          />
-        ) : porCategoria.length === 0 ? (
+        {porCategoria.length === 0 ? (
           <p className="sin-gastos">No hay gastos en este mes</p>
         ) : (
           <ul className="lista-categorias">
-            {porCategoria.map(({ categoria, total }) => {
+            {porCategoria.map(({ categoria, items, total }) => {
               const porcentaje = totalGeneral > 0 ? Math.round((total / totalGeneral) * 100) : 0
               return (
-                <li key={categoria} className="categoria-item" onClick={() => setCategoriaSeleccionada(categoria)}>
-                  <span className="categoria-item__icono">{emojiDe(categoria)}</span>
-                  <div className="categoria-item__info">
-                    <span className="categoria-item__nombre">{categoria}</span>
-                    <div className="categoria-item__barra-wrap">
-                      <div className="categoria-item__barra" style={{ width: `${porcentaje}%` }} />
+                <li key={categoria}>
+                  <div className="categoria-item" onClick={() => setCategoriaExpandida(c => c === categoria ? null : categoria)}>
+                    <span className="categoria-item__icono">{emojiDe(categoria)}</span>
+                    <div className="categoria-item__info">
+                      <span className="categoria-item__nombre">{categoria}</span>
+                      <div className="categoria-item__barra-wrap">
+                        <div className="categoria-item__barra" style={{ width: `${porcentaje}%` }} />
+                      </div>
+                    </div>
+                    <div className="categoria-item__derecha">
+                      <span className="categoria-item__total">{formatearPesos(total)}</span>
+                      <span className="categoria-item__pct">{porcentaje}%</span>
                     </div>
                   </div>
-                  <div className="categoria-item__derecha">
-                    <span className="categoria-item__total">{formatearPesos(total)}</span>
-                    <span className="categoria-item__pct">{porcentaje}%</span>
-                  </div>
+                  {categoriaExpandida === categoria && (
+                    <ul className="lista-gastos cuotas-detalle">
+                      {items.map((gasto) => (
+                        <li key={gasto.id} className="gasto-item">
+                          <div className="gasto-item__info">
+                            <span className="gasto-item__desc">{gasto.descripcion}</span>
+                            <span className="gasto-item__fecha">
+                              {formatearFecha(gasto.fecha)} · {gasto.compartido && gasto.pagador !== USUARIO_ACTUAL ? `Pagó ${OTRO_USUARIO}` : gasto.medio_de_pago}
+                              {subtituloGasto(gasto) && ` · ${subtituloGasto(gasto)}`}
+                            </span>
+                          </div>
+                          <div className="gasto-item__derecha">
+                            <span className="gasto-item__importe">{formatearPesos(aCargo(gasto))}</span>
+                            {gasto.compartido && <span className="gasto-item__badge">compartido</span>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               )
             })}
