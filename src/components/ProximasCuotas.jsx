@@ -190,7 +190,9 @@ function ProximasCuotas({ onCerrar }) {
                   <ul className="lista-categorias">
                     <li>
                       <div className="categoria-item" onClick={() => setRecurrentesAbierto(v => !v)}>
-                        <span className="categoria-item__icono">🔁</span>
+                        <span className="categoria-item__icono">
+                          <img src="/Waldo Recurrentes.png" alt="" />
+                        </span>
                         <div className="categoria-item__info">
                           <span className="categoria-item__nombre">Gastos recurrentes</span>
                           <span className="categoria-item__nota">estimado, igual todos los meses</span>
@@ -245,7 +247,9 @@ function ProximasCuotas({ onCerrar }) {
                   <ul className="lista-categorias">
                     <li>
                       <div className="categoria-item" onClick={() => setCuotasAbierto(v => !v)}>
-                        <span className="categoria-item__icono">🧾</span>
+                        <span className="categoria-item__icono">
+                          <img src="/Waldo Medios de Pago.png" alt="" />
+                        </span>
                         <div className="categoria-item__info">
                           <span className="categoria-item__nombre">Gastos en cuotas</span>
                         </div>

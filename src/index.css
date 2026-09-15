@@ -1300,6 +1300,13 @@ body {
   flex-shrink: 0;
 }
 
+.categoria-item__icono img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 .categoria-item__info {
   flex: 1;
   display: flex;
