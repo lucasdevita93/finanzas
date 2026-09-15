@@ -74,6 +74,12 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 
 ## Notas de arquitectura
 
+- `src/lib/gastos.js` — `cargarGastosDelMes({ perfil, pareja, categorias, anio, mes })` y
+  `normalizarGasto()`, compartidos por Gastos.jsx, PorCategoria.jsx y PorMedioDePago.jsx.
+  Cada uno de estos tres navega mes con su propio estado y trae su propio dato — antes
+  Categoría y Medio de pago dependían del mes que Gastos.jsx tuviera cargado y quedaban
+  vacíos al navegar a otro mes (fix aplicado 15/09/2026)
+
 - `gastos_recurrentes` no guarda `moneda`/`cotizacion`/`monto_original` (solo `importe`
   en pesos): un recurrente en USD se convierte **una sola vez**, al guardar, con la
   cotización cargada en ese momento. Si el dólar se mueve después, hay que editar el
