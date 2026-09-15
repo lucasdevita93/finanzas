@@ -20,7 +20,10 @@ Stack: React + Vite + PWA + Supabase + Vercel.
 - **Gastos** (`src/pages/Gastos.jsx`) — navegación por mes, gastos propios + compartidos
   del otro usuario mezclados, "Por categoría", "Por medio de pago", "Proyección", banner
   de recurrentes pendientes (funciona para cualquier mes, no solo el actual), botón
-  "+ Gasto"
+  "+ Gasto". "Por categoría" (`PorCategoria.jsx`) es acordeón: cada categoría con ícono,
+  se toca y despliega debajo la lista de sus gastos (sin repetir el ícono ahí). "Por medio
+  de pago" (`PorMedioDePago.jsx`) todavía usa el patrón viejo de reemplazar el panel con
+  un detalle y botón "Volver" — quedó sin migrar, no es un error
 - **Compartidos** (`src/pages/Compartidos.jsx`) — total compartido gastado, saldo neto
   con mascota Waldo Debe/Acreedor/Compartidos según estado, "Por categoría". No tiene
   botón de saldar/reclamar deuda (se sacó, no encajaba con el uso real mes a mes)
