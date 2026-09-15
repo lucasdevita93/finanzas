@@ -158,7 +158,7 @@ function FormularioGasto({ onCerrar, onGuardado, compartidoPorDefault = false, g
       if (modoRecurrente) {
         const datos = {
           descripcion: form.descripcion || null,
-          importe: parseFloat(form.importe),
+          importe: importeEnPesos,
           categoria_nombre: form.categoria,
           medio_de_pago_nombre: form.medio_de_pago || null,
           compartido: form.compartido,
